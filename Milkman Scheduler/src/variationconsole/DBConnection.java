@@ -13,7 +13,7 @@ public class DBConnection {
 		Connection con=null; 	//lpv
 		try {
 			//Class.forName("com.mysql.jdbc.Driver");
-			con=DriverManager.getConnection("jdbc:mysql://localhost/milkmandb","root","abhinav1*");
+			con=DriverManager.getConnection("jdbc:mysql://localhost/milkmandb","root","password");
 			
 		} 
 		catch (Exception e) {
