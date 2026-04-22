@@ -19,6 +19,14 @@ import javafx.stage.Stage;
 
 import static com.example.milkman_legacy.Constants.APP_CLOSE_SOUND;
 import static com.example.milkman_legacy.Constants.DASHBOARD_OPTION_CLICK_SOUND;
+import static com.example.milkman_legacy.Constants.ALL_CUSTOMERS_VIEW;
+import static com.example.milkman_legacy.Constants.BILL_PANEL_VIEW;
+import static com.example.milkman_legacy.Constants.BILLING_HISTORY_VIEW;
+import static com.example.milkman_legacy.Constants.CUSTOMER_ENTRY_VIEW;
+import static com.example.milkman_legacy.Constants.INCOME_RECORD_VIEW;
+import static com.example.milkman_legacy.Constants.PAYMENT_COLLECTION_VIEW;
+import static com.example.milkman_legacy.Constants.VARIATION_CONSOLE_VIEW;
+import static com.example.milkman_legacy.Constants.VARIATION_DISPLAY_VIEW;
 
 public class DashboardController {
 
@@ -49,7 +57,7 @@ public class DashboardController {
         audio.play();
     }
 
-    void openFile(String s) {
+    void openView(String s) {
         try {
             playSound(DASHBOARD_OPTION_CLICK_SOUND);
             Parent root = FXMLLoader.load(getClass().getResource(s));
@@ -64,54 +72,46 @@ public class DashboardController {
 
     @FXML
     void openAllCustomers(MouseEvent event) {
-        String s = "allcustomers/allcustomersView.fxml";
-        openFile(s);
+        openView(ALL_CUSTOMERS_VIEW);
     }
 
     @FXML
     void openBillPanel(MouseEvent event) {
-        String s = "billpanel/billpanelView.fxml";
-        openFile(s);
+        openView(BILL_PANEL_VIEW);
     }
 
     @FXML
     void openBillingHistory(MouseEvent event) {
-        String s = "billinghistory/billinghistoryView.fxml";
-        openFile(s);
+        openView(BILLING_HISTORY_VIEW);
     }
 
     @FXML
     void openCustomerEntry(MouseEvent event) {
-        String s = "customerentry/customerentryView.fxml";
-        openFile(s);
+        openView(CUSTOMER_ENTRY_VIEW);
     }
 
     @FXML
     void openIncomeRecord(MouseEvent event) {
-        String s = "incomerecord/incomerecordView.fxml";
-        openFile(s);
+        openView(INCOME_RECORD_VIEW);
     }
 
     @FXML
     void openPaymentCollection(MouseEvent event) {
-        String s = "paymentcollection/paymentcollectionView.fxml";
-        openFile(s);
+        openView(PAYMENT_COLLECTION_VIEW);
     }
 
     @FXML
     void openVariationConsole(MouseEvent event) {
-        String s = "variationconsole/variationconsoleView.fxml";
-        openFile(s);
+        openView(VARIATION_CONSOLE_VIEW);
     }
 
     @FXML
     void openVariationDisplay(MouseEvent event) {
-        String s = "variationdisplay/variationdisplayView.fxml";
-        openFile(s);
+        openView(VARIATION_DISPLAY_VIEW);
     }
 
-    @FXML // This method is called by the FXMLLoader when initialization is complete
+    @FXML
     void initialize() {
-
+        // This method is called by the FXMLLoader when initialization is complete
     }
 }
