@@ -39,7 +39,6 @@ build/
 ### Files ###
 mvnw
 mvnw.cmd
-myvmoptions.txt
 .class
 mysql-xampp-dbconfig.json
 postgresql-dbconfig.json
