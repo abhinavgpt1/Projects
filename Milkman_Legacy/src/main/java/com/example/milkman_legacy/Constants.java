@@ -17,13 +17,13 @@ public class Constants {
     private static final String VARIATION_DISPLAY = ROOT_PATH + "/variationDisplay";
 
     // Derived paths - fxml
-    public static final String LOGIN_VIEW = LOGIN + "/LoginView.fxml";
-    public static final String DASHBOARD_VIEW = DASHBOARD + "/DashboardView.fxml";
     public static final String ALL_CUSTOMERS_VIEW = ALL_CUSTOMERS + "/AllCustomersView.fxml";
-    public static final String BILL_PANEL_VIEW = BILL_PANEL + "/BillPanelView.fxml";
     public static final String BILLING_HISTORY_VIEW = BILLING_HISTORY + "/BillingHistoryView.fxml";
+    public static final String BILL_PANEL_VIEW = BILL_PANEL + "/BillPanelView.fxml";
     public static final String CUSTOMER_ENTRY_VIEW = CUSTOMER_ENTRY + "/CustomerEntryView.fxml";
+    public static final String DASHBOARD_VIEW = DASHBOARD + "/DashboardView.fxml";
     public static final String INCOME_RECORD_VIEW = INCOME_RECORD + "/IncomeRecordView.fxml";
+    public static final String LOGIN_VIEW = LOGIN + "/LoginView.fxml";
     public static final String PAYMENT_COLLECTION_VIEW = PAYMENT_COLLECTION + "/PaymentCollectionView.fxml";
     public static final String VARIATION_CONSOLE_VIEW = VARIATION_CONSOLE + "/VariationConsoleView.fxml";
     public static final String VARIATION_DISPLAY_VIEW = VARIATION_DISPLAY + "/VariationDisplayView.fxml";

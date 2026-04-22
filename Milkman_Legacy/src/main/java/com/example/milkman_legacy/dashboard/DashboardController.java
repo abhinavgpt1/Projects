@@ -36,28 +36,14 @@ public class DashboardController {
     @FXML // URL location of the FXML file that was given to the FXMLLoader
     private URL location;
 
-    @FXML
-    void doClose(ActionEvent event) {
-        playSound(APP_CLOSE_SOUND);
-        try {
-            // to hear a sound while exiting
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.exit(0);
-    }
-
-    URL url;
-    AudioClip audio;
-
-    void playSound(String snd) {
-        url = getClass().getResource(snd);
-        audio = new AudioClip(url.toString());
+    // -----------------------helper methods-----------------------
+    private void playSound(String snd) {
+        URL url = getClass().getResource(snd);
+        AudioClip audio = new AudioClip(url.toString());
         audio.play();
     }
 
-    void openView(String s) {
+    private void openView(String s) {
         try {
             playSound(DASHBOARD_OPTION_CLICK_SOUND);
             Parent root = FXMLLoader.load(getClass().getResource(s));
@@ -68,6 +54,19 @@ public class DashboardController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    // -----------------------public methods-----------------------
+    @FXML
+    void doClose(ActionEvent event) {
+        playSound(APP_CLOSE_SOUND);
+        try {
+            // to hear a sound while exiting
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.exit(0);
     }
 
     @FXML
