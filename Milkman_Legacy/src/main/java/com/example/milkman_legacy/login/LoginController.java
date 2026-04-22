@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ResourceBundle;
 
+import com.example.milkman_legacy.Constants;
 import com.example.milkman_legacy.dbutil.DBConnection;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -23,6 +24,9 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.media.AudioClip;
 import javafx.stage.Stage;
+
+import static com.example.milkman_legacy.Constants.DASHBOARD_VIEW;
+import static com.example.milkman_legacy.Constants.APP_LOGIN_SOUND;
 
 public class LoginController {
 
@@ -60,12 +64,16 @@ public class LoginController {
 				String id = table.getString("id");
 				String pwd = table.getString("password");
 				if (id.equals(txtId.getText()) && pwd.equals(txtPassword.getText())) {
-					url = getClass().getResource("../assets/audio/flame-arrow.wav");
+					url = getClass().getResource(APP_LOGIN_SOUND);
 					audio = new AudioClip(url.toString());
 					audio.play();
-
-					Parent root = FXMLLoader
-							.load(getClass().getClassLoader().getResource("dashboard/dashboardView.fxml"));
+					try {
+						// 0.5sec wait to overlap between hearing sound while dashboard loads
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					Parent root = FXMLLoader.load(getClass().getResource(DASHBOARD_VIEW));
 					Scene scene = new Scene(root);
 					Stage stage = new Stage();
 					stage.setScene(scene);
@@ -73,8 +81,9 @@ public class LoginController {
 					Scene scene1 = (Scene) btnLogin.getScene();
 					scene1.getWindow().hide();
 					// IF the user forgets the password...then he/she has navicat installed LOL!
-				} else
+				} else {
 					showMsg("Either ID or Password is Wrong");
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
