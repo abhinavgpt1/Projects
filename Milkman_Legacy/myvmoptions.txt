@@ -1,0 +1,1 @@
+-ea --module-path "V:\BCE Coding\Java\Java Softwares 64bit\javafx-sdk-24.0.2\lib" --add-modules javafx.controls,javafx.fxml --enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow --enable-native-access=javafx.graphics
