@@ -1,5 +1,0 @@
-{
-  "jdbcConnection": "jdbc:postgresql://localhost:5432/database_ag",
-  "username": "postgres",
-  "password": "password"
-}

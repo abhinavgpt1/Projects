@@ -16,8 +16,6 @@
         <maven.compiler.target>24</maven.compiler.target>
         <javafx.version>24</javafx.version>
         <mysql.connector.version>8.0.33</mysql.connector.version>
-        <postgresql.connector.version>42.7.7</postgresql.connector.version>
-        <mssql.connector.version>13.2.0.jre11</mssql.connector.version>
         <fasterxml.jackson.version>2.21.2</fasterxml.jackson.version>
     </properties>
 
@@ -33,17 +31,10 @@
             <artifactId>mysql-connector-j</artifactId>
             <version>${mysql.connector.version}</version>
         </dependency>
-        <!--   postgres and sqlserver aren't used in this project, but they are kept for the sake of simplicity of connection     -->
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgresql.connector.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <version>${mssql.connector.version}</version>
-            <scope>compile</scope>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-media</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -77,8 +68,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -90,7 +81,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.milkman_legacy/com.example.milkman_legacy.HelloApplication
+                            <mainClass>com.example.milkman_legacy/com.example.milkman_legacy.login.LoginApplication
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

@@ -1,5 +1,0 @@
-{
-  "jdbcConnection": "<jdbc-connection-string-WITH-DATABASE>",
-  "username": "<db-username>",
-  "password": "<db-password>"
-}

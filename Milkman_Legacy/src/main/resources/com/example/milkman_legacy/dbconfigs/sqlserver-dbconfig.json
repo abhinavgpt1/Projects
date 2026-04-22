@@ -1,5 +1,0 @@
-{
-  "jdbcConnection": "jdbc:sqlserver://localhost;encrypt=true;trustServerCertificate=true;databaseName=database_ag;",
-  "username": "root",
-  "password": "password"
-}

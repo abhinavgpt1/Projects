@@ -1,5 +1,0 @@
-{
-  "jdbcConnection": "jdbc:mysql://localhost/learn_javafx",
-  "username": "root",
-  "password": ""
-}

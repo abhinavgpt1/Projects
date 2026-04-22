@@ -2,13 +2,13 @@
 -- MILK SUBSCRIPTION MANAGEMENT - UNIFIED DATABASE SCHEMA
 -- =============================================================================
 -- Description : Single consolidated database for milk delivery and subscription
--- Database    : MILK_SUBSCRIPTION
+-- Database    : milkmandb_legacy
 -- Tables      : customer_details, bill_panel, variation_console, idpwd
 -- =============================================================================
 
 
-CREATE DATABASE IF NOT EXISTS MILK_SUBSCRIPTION;
-USE MILK_SUBSCRIPTION;
+CREATE DATABASE IF NOT EXISTS milkmandb_legacy;
+USE milkmandb_legacy;
 
 
 -- -----------------------------------------------------------------------------
@@ -35,7 +35,7 @@ CREATE TABLE customer_details (
 -- Billing records per customer for each subscription period.
 -- -----------------------------------------------------------------------------
 CREATE TABLE bill_panel (
-    bill_id                 INT             PRIMARY KEY IDENTITY,  -- Auto-incremented bill ID
+    bill_id                 INT             PRIMARY KEY AUTO_INCREMENT,  -- Auto-incremented bill ID
     cust_id                 VARCHAR(36)     NOT NULL,              -- FK → customer_details.cust_id
     start_date              DATETIME        NOT NULL,              -- Billing period start
     end_date                DATETIME        NOT NULL,              -- Billing period end
@@ -54,7 +54,7 @@ CREATE TABLE bill_panel (
 -- Daily log of quantity adjustments/changes for a customer's delivery.
 -- -----------------------------------------------------------------------------
 CREATE TABLE variation_console (
-    variation_id            INT             PRIMARY KEY IDENTITY,  -- Auto-incremented log ID
+    variation_id            INT             PRIMARY KEY AUTO_INCREMENT,  -- Auto-incremented log ID
     cust_id                 VARCHAR(36)     NOT NULL,              -- FK → customer_details.cust_id
     variation_date          DATE            NOT NULL,              -- Date of the variation
     cow_milk_qty            FLOAT,                                 -- Adjusted cow milk quantity
