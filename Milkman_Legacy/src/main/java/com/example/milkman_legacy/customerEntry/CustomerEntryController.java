@@ -23,6 +23,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 
 public class CustomerEntryController {
@@ -135,34 +136,44 @@ public class CustomerEntryController {
 	@FXML
 	void doFetch(ActionEvent event) {
 		String name = comboCust.getSelectionModel().getSelectedItem();
-		if (isCustomerNameValid()) {
-			try {
-				PreparedStatement pst = con.prepareStatement("select * from customerentry where sname=?");
-				pst.setString(1, name);
-				ResultSet table = pst.executeQuery();
-				while(table.next()) {
-					txtMob.setText(table.getString("mobile"));
-					txtAddress.setText(table.getString("address"));
-					txtCq.setText(String.valueOf(table.getFloat("cq")));
-					txtCp.setText(String.valueOf(table.getFloat("cprice")));
-					txtBq.setText(String.valueOf(table.getFloat("bq")));
-					txtBp.setText(String.valueOf(table.getFloat("bprice")));
-					dtpDos.setValue(table.getDate("dos").toLocalDate());
-					String imageUriPath = table.getString("imgpath");
-					if (imageUriPath.equals("nil"))
-						imgNoFace.setVisible(true);
-					else {
-						imgNoFace.setVisible(false);
-						imgCustomer.setImage(new Image(imageUriPath.toString()));
-						imgCustomer.setVisible(true);
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
+		if (!isCustomerNameValid()) {
 			imgCustomer.setVisible(false);
 			imgNoFace.setVisible(true);
+			System.out.println("ERROR: Fetch triggered for invalid name: " + name);
+			return;
+		}
+		if (!doesCustomerExist(name)) {
+			imgCustomer.setVisible(false);
+			imgNoFace.setVisible(true);
+			System.out.println("WARNING: Fetch attempted on customer which doesn't exist in database: " + name);
+			showAlert("Invalid Customer", "This customer " + name + " doesn't exist in our database. Please use another one to fetch.", Alert.AlertType.WARNING);
+			return;
+		}
+		try {
+			PreparedStatement pst = con.prepareStatement("select * from customerentry where sname=?");
+			pst.setString(1, name);
+			ResultSet table = pst.executeQuery();
+			while(table.next()) {
+				txtMob.setText(table.getString("mobile"));
+				txtAddress.setText(table.getString("address"));
+				txtCq.setText(String.valueOf(table.getFloat("cq")));
+				txtCp.setText(String.valueOf(table.getFloat("cprice")));
+				txtBq.setText(String.valueOf(table.getFloat("bq")));
+				txtBp.setText(String.valueOf(table.getFloat("bprice")));
+				dtpDos.setValue(table.getDate("dos").toLocalDate());
+				String imageUriPath = table.getString("imgpath");
+				if (imageUriPath.equals("nil")) {
+					imgNoFace.setVisible(true);
+					imgCustomer.setVisible(false);
+				}
+				else {
+					imgNoFace.setVisible(false);
+					imgCustomer.setImage(new Image(imageUriPath));
+					imgCustomer.setVisible(true);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -191,16 +202,16 @@ public class CustomerEntryController {
 	}
 
 	public void showAlert(String title, String message, Alert.AlertType alertType){
-		// TODO: wrap long texts in Alert
 		Alert alert = new Alert(alertType);
 		alert.setTitle(title);
 		alert.setContentText(message);
+		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.show();
 	}
 	private boolean isCustomerNameValid() {
 		String sname = comboCust.getSelectionModel().getSelectedItem();
 		if (sname == null || sname.isBlank()) {
-			showAlert("Invalid Name", "Name missing. Use alphabets for naming a person.", Alert.AlertType.ERROR);
+			showAlert("Invalid Name", "Customer name is invalid. Enter some letters in Customer name search bar.", Alert.AlertType.ERROR);
 			return false;
 		}
 		return true;
