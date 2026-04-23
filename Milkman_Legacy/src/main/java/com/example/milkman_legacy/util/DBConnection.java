@@ -1,4 +1,4 @@
-package com.example.milkman_legacy.dbutil;
+package com.example.milkman_legacy.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

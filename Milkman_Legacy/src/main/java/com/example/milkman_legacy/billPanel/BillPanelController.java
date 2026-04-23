@@ -14,7 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-import com.example.milkman_legacy.dbutil.DBConnection;
+import com.example.milkman_legacy.util.DBConnection;
 import com.example.milkman_legacy.sms.SST_SMS;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
