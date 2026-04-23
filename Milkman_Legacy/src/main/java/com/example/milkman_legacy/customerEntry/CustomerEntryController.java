@@ -23,8 +23,10 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
+
+import static com.example.milkman_legacy.util.UIHelper.getDesktopPath;
+import static com.example.milkman_legacy.util.UIHelper.showAlert;
 
 public class CustomerEntryController {
 
@@ -67,24 +69,12 @@ public class CustomerEntryController {
 	String imgPath = "nil";
 	Connection con;
 
-	private String getDefaultProfilePhotoSelectionPath() {
-		// Desktop
-		String osName = System.getProperty("os.name").toLowerCase();
-		String defaultProfilePhotoSelectionPath;
-		if (osName.contains("win")) {
-			defaultProfilePhotoSelectionPath = System.getProperty("user.home") + "\\Desktop";
-		} else {
-			defaultProfilePhotoSelectionPath = System.getProperty("user.home");
-		}
-		return defaultProfilePhotoSelectionPath;
-	}
-
 	@FXML
 	void doBrowse(ActionEvent event) {
 		// Selecting an image
 		FileChooser filechooser = new FileChooser();
 		filechooser.setTitle("Select Profile Photo");
-		filechooser.setInitialDirectory(new File(getDefaultProfilePhotoSelectionPath()));
+		filechooser.setInitialDirectory(new File(getDesktopPath()));
 		// For fixed paths in Windows, use \\ for separation
 		filechooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Image Files", "*.jpg", "*.png"));
 		// folders will be displayed along with images of formats mentioned
@@ -200,14 +190,6 @@ public class CustomerEntryController {
 			return false;
 		}
 	}
-
-	public void showAlert(String title, String message, Alert.AlertType alertType){
-		Alert alert = new Alert(alertType);
-		alert.setTitle(title);
-		alert.setContentText(message);
-		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-		alert.show();
-	}
 	private boolean isCustomerNameValid() {
 		String sname = comboCust.getSelectionModel().getSelectedItem();
 		if (sname == null || sname.isBlank()) {
@@ -285,7 +267,7 @@ public class CustomerEntryController {
             pst = con.prepareStatement("select * from customerentry where sname=?");
         	pst.setString(1, sname);
 			ResultSet table = pst.executeQuery();
-			while(table.next()) {
+			if (table.next()) {
 				return true;
 			}
 			return false;
