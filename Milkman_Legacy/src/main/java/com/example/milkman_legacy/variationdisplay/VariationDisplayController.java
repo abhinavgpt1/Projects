@@ -57,7 +57,6 @@ public class VariationDisplayController {
 
 			getRecordsFromDatabase(pst);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		tbl.setItems(list);
@@ -81,7 +80,6 @@ public class VariationDisplayController {
 				getRecordsFromDatabase(pst);
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		tbl.setItems(list);
@@ -100,7 +98,6 @@ public class VariationDisplayController {
 			PreparedStatement pst = con.prepareStatement("select * from variationconsole");
 			getRecordsFromDatabase(pst);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		tbl.setItems(list);
@@ -125,7 +122,6 @@ public class VariationDisplayController {
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -139,7 +135,6 @@ public class VariationDisplayController {
 				comboName.getItems().add(table.getString("sname"));
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

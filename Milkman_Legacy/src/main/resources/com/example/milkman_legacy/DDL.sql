@@ -7,31 +7,30 @@ CREATE TABLE idpwd (
 );
 
 CREATE TABLE customerentry (
-    name VARCHAR(255) NOT NULL,
+    sname VARCHAR(255) PRIMARY KEY,
     mobile VARCHAR(20),
     address TEXT,
     cq DECIMAL(10,2),
-    cp DECIMAL(10,2),
+    cprice DECIMAL(10,2),
     bq DECIMAL(10,2),
-    bp DECIMAL(10,2),
-    dos DATE,
-    img_path VARCHAR(500)
+    bprice DECIMAL(10,2),
+    dos DATE NOT NULL, -- date of start i.e. subscription start date
+    imgpath VARCHAR(500)
 );
 
 CREATE TABLE billpanel (
-    bill_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    dos DATE NOT NULL,
-    doe DATE NOT NULL,
-    bill_amount FLOAT,
+    sname VARCHAR(255) PRIMARY KEY,
+    status BOOLEAN DEFAULT FALSE,
     cqty FLOAT,
     bqty FLOAT,
-    is_paid BOOLEAN
+    amount FLOAT,
+    dos DATE NOT NULL,
+    doe DATE NOT NULL
 );
 
 CREATE TABLE variationconsole (
-    name VARCHAR(255) NOT NULL,
-    variation_date DATE NOT NULL,
-    cq_variation DECIMAL(10,2),
-    bq_variation DECIMAL(10,2)
+    sname VARCHAR(255) PRIMARY KEY,
+    cdate DATE NOT NULL,
+    cq DECIMAL(10,2),
+    bq DECIMAL(10,2)
 );

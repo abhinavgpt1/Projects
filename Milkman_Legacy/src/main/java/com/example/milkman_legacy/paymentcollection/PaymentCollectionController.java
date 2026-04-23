@@ -73,7 +73,6 @@ public class PaymentCollectionController {
 				showMsg("Select Name");
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -103,7 +102,6 @@ public class PaymentCollectionController {
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -117,7 +115,6 @@ public class PaymentCollectionController {
 				comboName.getItems().add(table.getString("sname"));
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

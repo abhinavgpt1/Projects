@@ -1,16 +1,13 @@
 package com.example.milkman_legacy.billingHistory;
 
 public class CustomerBean {
-	String name;
-	String Bdos;
-	String Bdoe;
-	float Bamt;
-	float Bcqty;
-	float Bbqty;
-	String Bstatus;
-
-	public CustomerBean() {
-	}
+	private String name;
+	private String Bdos;
+	private String Bdoe;
+	private float Bamt;
+	private float Bcqty;
+	private float Bbqty;
+	private String Bstatus;
 
 	public CustomerBean(String name, String bdos, String bdoe, float bamt, float bcqty, float bbqty, String bstatus) {
 		super();

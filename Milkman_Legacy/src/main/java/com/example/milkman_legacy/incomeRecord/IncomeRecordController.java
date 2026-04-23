@@ -48,7 +48,6 @@ public class IncomeRecordController {
             table.next();
             lblAmt.setText(String.valueOf(table.getFloat("sum(amount)")));
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
