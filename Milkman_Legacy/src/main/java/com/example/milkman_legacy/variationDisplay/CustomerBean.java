@@ -1,4 +1,4 @@
-package com.example.milkman_legacy.variationdisplay;
+package com.example.milkman_legacy.variationDisplay;
 
 public class CustomerBean {
 	String name;

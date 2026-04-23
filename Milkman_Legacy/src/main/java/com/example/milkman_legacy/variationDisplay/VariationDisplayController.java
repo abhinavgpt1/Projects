@@ -2,7 +2,7 @@
  * Sample Skeleton for 'VariationDisplayView.fxml' Controller Class
  */
 
-package com.example.milkman_legacy.variationdisplay;
+package com.example.milkman_legacy.variationDisplay;
 
 import java.net.URL;
 import java.sql.Connection;
@@ -139,7 +139,7 @@ public class VariationDisplayController {
 		}
 	}
 
-	@FXML // This method is called by the FXMLLoader when initialization is complete
+	@FXML
 	void initialize() {
 		con = DBConnection.doConnect();
 		fillCombo();

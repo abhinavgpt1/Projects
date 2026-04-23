@@ -2,7 +2,7 @@
  * Sample Skeleton for 'VariationConsoleView.fxml' Controller Class
  */
 
-package com.example.milkman_legacy.variationconsole;
+package com.example.milkman_legacy.variationConsole;
 
 import java.net.URL;
 import java.sql.Connection;
@@ -75,7 +75,6 @@ public class VariationConsoleController {
 		txtCq.setText("");
 		chkNil.setSelected(false);
 		dtpDate.getEditor().setText("");
-
 	}
 
 	Connection con;
@@ -85,7 +84,6 @@ public class VariationConsoleController {
 		ObservableList<String> lstFull = listCust.getItems();
 		ObservableList<String> lstSelected = listCust.getSelectionModel().getSelectedItems();
 		lstFull.retainAll(lstSelected);
-
 	}
 
 	@FXML
@@ -127,14 +125,11 @@ public class VariationConsoleController {
 				}
 				pst.executeUpdate();
 				listCust.getItems().remove(name);
-
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-
 		} else
 			showMsg("Select Name");
-
 	}
 
 	void showMsg(String msg) {
@@ -142,7 +137,6 @@ public class VariationConsoleController {
 		al.setTitle("ERROR");
 		al.setContentText(msg);
 		al.show();
-
 	}
 
 	@FXML
@@ -173,12 +167,10 @@ public class VariationConsoleController {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-
 		}
-
 	}
 
-	void fillList() {
+	private void fillList() {
 		ArrayList<String> ary = new ArrayList<>();
 		try {
 			PreparedStatement pst = con.prepareStatement("select sname from customerentry");
@@ -191,10 +183,9 @@ public class VariationConsoleController {
 			e.printStackTrace();
 		}
 		listCust.getItems().addAll(ary);
-
 	}
 
-	@FXML // This method is called by the FXMLLoader when initialization is complete
+	@FXML
 	void initialize() {
 		con = DBConnection.doConnect();
 		fillList();

@@ -94,6 +94,7 @@ public class CustomerEntryController {
 			// FYI, File expects a System File Path, but toString() gives it a Network-style URL.
 			// Make sure to retrieve File path correctly
 			imgNoFace.setVisible(false);
+			imgCustomer.setVisible(true);
 			imgPath = selectedfile.toURI().toString();
 			imgCustomer.setImage(new Image(imgPath));
 			// TOOD: onSave, save this image into your server/assets for retrieval. Think outside localhost.
@@ -225,8 +226,8 @@ public class CustomerEntryController {
 	private boolean isDateOfMilkSubscriptionStartValid() {
 		LocalDate dateOfMilkSubscriptionStart = dtpDos.getValue();
 		if (dateOfMilkSubscriptionStart == null) {
-			// no alert since we're saving default date as CURRENT_DATE
-			// showAlert("Invalid Date", "Enter a valid date in dd/mm/yyyy format", Alert.AlertType.ERROR);
+			System.out.println("ERROR: Invalid date for save: " + dtpDos.getEditor().getText());
+		 	showAlert("Invalid Date", "Enter a valid date in dd/mm/yyyy format", Alert.AlertType.ERROR);
 			return false;
 		}
 		return true;
@@ -235,6 +236,7 @@ public class CustomerEntryController {
 		if (!isCustomerNameValid()) return false;
 		if (!isCowMilkQtyAndPriceValid()) return false;
 		if (!isBuffaloMilkQtyAndPriceValid()) return false;
+		if (!isDateOfMilkSubscriptionStartValid()) return false;
 		return true;
 	}
 
@@ -254,15 +256,12 @@ public class CustomerEntryController {
 			pst.setFloat(5, Float.parseFloat(txtCp.getText()));
 			pst.setFloat(6, Float.parseFloat(txtBq.getText()));
 			pst.setFloat(7, Float.parseFloat(txtBp.getText()));
-			LocalDate dateOfMilkSubscriptionStart = LocalDate.now();
-			if (isDateOfMilkSubscriptionStartValid())
-				dateOfMilkSubscriptionStart = dtpDos.getValue();
-			pst.setDate(8, java.sql.Date.valueOf(dateOfMilkSubscriptionStart));
+			pst.setDate(8, java.sql.Date.valueOf(dtpDos.getValue()));
 			pst.setString(9, imgPath);
 			int rowsAffected = pst.executeUpdate();
 			if (rowsAffected == 1) {
-				System.out.println("INFO: Customer onboarded: " + name + ", " + dateOfMilkSubscriptionStart);
-				showAlert("Customer Onboarded", "Milk subscription started for " + name + " from " + dateOfMilkSubscriptionStart, Alert.AlertType.INFORMATION);
+				System.out.println("INFO: Customer onboarded: " + name + ", " + dtpDos.getValue());
+				showAlert("Customer Onboarded", "Milk subscription started for " + name + " from " + dtpDos.getValue(), Alert.AlertType.INFORMATION);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

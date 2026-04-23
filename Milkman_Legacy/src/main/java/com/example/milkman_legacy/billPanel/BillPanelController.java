@@ -256,7 +256,7 @@ public class BillPanelController {
 		listCust.getItems().addAll(asl);
 	}
 
-	@FXML // This method is called by the FXMLLoader when initialization is complete
+	@FXML
 	void initialize() {
 		con = DBConnection.doConnect();
 		imgNoFace.setVisible(false);

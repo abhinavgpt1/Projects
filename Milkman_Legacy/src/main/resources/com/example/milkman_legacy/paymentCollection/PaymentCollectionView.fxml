@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="550.0" prefWidth="550.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.milkman_legacy.paymentcollection.PaymentCollectionController">
+<AnchorPane prefHeight="550.0" prefWidth="550.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.milkman_legacy.paymentCollection.PaymentCollectionController">
    <children>
       <ImageView fitHeight="478.0" fitWidth="550.0" layoutY="34.0" opacity="0.81" pickOnBounds="true">
          <image>

@@ -52,7 +52,7 @@ public class IncomeRecordController {
         }
     }
 
-    @FXML // This method is called by the FXMLLoader when initialization is complete
+    @FXML
     void initialize() {
         con = DBConnection.doConnect();
     }

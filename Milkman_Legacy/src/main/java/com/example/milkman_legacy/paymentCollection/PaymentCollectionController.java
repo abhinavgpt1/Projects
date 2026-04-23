@@ -2,7 +2,7 @@
  * Sample Skeleton for 'PaymentCollectionView.fxml' Controller Class
  */
 // When payment is received; so must be updated and a msg needs to be sent monthly to the customer
-package com.example.milkman_legacy.paymentcollection;
+package com.example.milkman_legacy.paymentCollection;
 
 import java.net.URL;
 import java.sql.Connection;
@@ -119,7 +119,7 @@ public class PaymentCollectionController {
 		}
 	}
 
-	@FXML // This method is called by the FXMLLoader when initialization is complete
+	@FXML
 	void initialize() {
 		con = DBConnection.doConnect();
 		fillCombo();

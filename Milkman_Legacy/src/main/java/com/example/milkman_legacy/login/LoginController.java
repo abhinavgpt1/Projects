@@ -97,7 +97,7 @@ public class LoginController {
 		al.show();
 	}
 
-	@FXML // This method is called by the FXMLLoader when initialization is complete
+	@FXML
 	void initialize() {
 		con = DBConnection.doConnect();
 	}
