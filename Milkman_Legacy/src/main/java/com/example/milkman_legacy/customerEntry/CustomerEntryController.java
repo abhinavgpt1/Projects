@@ -26,8 +26,13 @@ import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 
 import static com.example.milkman_legacy.util.UIHelper.getDesktopPath;
+import static com.example.milkman_legacy.util.UIHelper.isNumber;
 import static com.example.milkman_legacy.util.UIHelper.showAlert;
 
+/**
+ * The purpose of this page is to onboard a new customer, with daily delivery of cow milk and/or buffalo milk with fixed qty.
+ * This qty if changed for some day will be logged in VariationConsole by milkman.
+ */
 public class CustomerEntryController {
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
@@ -181,15 +186,6 @@ public class CustomerEntryController {
 		dtpDos.setValue(LocalDate.now());
 	}
 
-	public boolean isNumber(String value) {
-		try {
-			Float.parseFloat(value);
-			return true;
-		} catch(NumberFormatException | NullPointerException n){
-			System.out.println(value + " isn't a number");
-			return false;
-		}
-	}
 	private boolean isCustomerNameValid() {
 		String sname = comboCust.getSelectionModel().getSelectedItem();
 		if (sname == null || sname.isBlank()) {
@@ -225,17 +221,10 @@ public class CustomerEntryController {
 		}
 		return true;
 	}
-	private boolean validateCustomerEntryDetailsBeforeSave() {
-		if (!isCustomerNameValid()) return false;
-		if (!isCowMilkQtyAndPriceValid()) return false;
-		if (!isBuffaloMilkQtyAndPriceValid()) return false;
-		if (!isDateOfMilkSubscriptionStartValid()) return false;
-		return true;
-	}
 
 	@FXML
 	void doSave(ActionEvent event) {
-		if (!validateCustomerEntryDetailsBeforeSave()) {
+		if (!isCustomerNameValid() || !isCowMilkQtyAndPriceValid() || !isBuffaloMilkQtyAndPriceValid() || !isDateOfMilkSubscriptionStartValid()) {
 			System.out.println("ERROR: Validation failure before save");
 			return;
 		}
@@ -336,7 +325,7 @@ public class CustomerEntryController {
 
 	@FXML
 	void initialize() {
-		// TODO: use single imageView and render default or customer photo at runtime. Don't mantain 2 imageView.
+		// TODO: use single imageView and render default or customer photo at runtime. Don't maintain 2 imageView.
 		imgNoFace.setVisible(true);
 		dtpDos.setValue(LocalDate.now());
 		con = DBConnection.doConnect();

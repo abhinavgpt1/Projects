@@ -29,7 +29,7 @@ CREATE TABLE billpanel (
 );
 
 CREATE TABLE variationconsole (
-    sname VARCHAR(255) PRIMARY KEY,
+    sname VARCHAR(255) NOT NULL, -- this is done for multiple offsets if incorrect entry is entered from UI for a particular day
     cdate DATE NOT NULL,
     cq DECIMAL(10,2),
     bq DECIMAL(10,2)

@@ -29,6 +29,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 
+import static com.example.milkman_legacy.util.UIHelper.isNumber;
+import static com.example.milkman_legacy.util.UIHelper.showAlert;
+
+/**
+ * The purpose of this page is to store qty of milk delivered on a particular day which is different from the agreed upon qty and/or type during customer onboarding.
+ * This variation is later utilized to calculate bill accordingly.
+ */
 public class VariationConsoleController {
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
@@ -63,18 +70,21 @@ public class VariationConsoleController {
 	@FXML // fx:id="imgNoFace"
 	private ImageView imgNoFace; // Value injected by FXMLLoader
 
-	@FXML
-	void doReset(ActionEvent event) {
+	private void reset() {
 		imgCustomer.setVisible(false);
-		imgNoFace.setVisible(false);
-		listCust.getItems().clear();
-		fillList();
+		imgNoFace.setVisible(true);
+		resetAndFillOnboardedCustomers();
 		lblBq.setText("");
 		lblCq.setText("");
 		txtBq.setText("");
 		txtCq.setText("");
 		chkNil.setSelected(false);
-		dtpDate.getEditor().setText("");
+		dtpDate.setValue(LocalDate.now());
+	}
+
+	@FXML
+	void doReset(ActionEvent event) {
+		reset();
 	}
 
 	Connection con;
@@ -86,83 +96,111 @@ public class VariationConsoleController {
 		lstFull.retainAll(lstSelected);
 	}
 
-	@FXML
-	void doSave(ActionEvent event) {
-		String name = listCust.getSelectionModel().getSelectedItem();
-		// check if a variation corresponding name exists
-
-		if (name != null) {
-			try {
-				PreparedStatement pst = con.prepareStatement("insert into variationconsole values(?,?,?,?)");
-				pst.setString(1, name);
-
-				LocalDate lwdate = dtpDate.getValue();
-				if (lwdate == null) {
-					String stwdate = dtpDate.getEditor().getText();
-					lwdate = LocalDate.parse(stwdate);
-				}
-				pst.setDate(2, java.sql.Date.valueOf(lwdate));
-
-				if (Float.parseFloat(lblCq.getText()) == 0)
-					txtCq.setText("0");
-				if (Float.parseFloat(lblBq.getText()) == 0)
-					txtBq.setText("0");
-
-				if (chkNil.isSelected()) {
-					pst.setFloat(3, -Float.parseFloat(lblCq.getText()));
-					pst.setFloat(4, -Float.parseFloat(lblBq.getText()));
-				} else {
-					// checking if abs(variation in milk) doesn't go below base milk qty
-					if (Float.parseFloat(txtCq.getText()) < 0)
-						if (Float.parseFloat(lblCq.getText()) <= Math.abs(Float.parseFloat(txtCq.getText())))
-							showMsg("Check cow qty. Input value exceeds base value");
-					if (Float.parseFloat(txtBq.getText()) < 0)
-						if (Float.parseFloat(lblBq.getText()) <= Math.abs(Float.parseFloat(txtBq.getText())))
-							showMsg("Check buffalo qty. Input value exceeds base value");
-
-					pst.setFloat(3, Float.parseFloat(txtCq.getText()));
-					pst.setFloat(4, Float.parseFloat(txtBq.getText()));
-				}
-				pst.executeUpdate();
-				listCust.getItems().remove(name);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		} else
-			showMsg("Select Name");
+	private boolean isDeliveryDateValid() {
+		LocalDate deliveryDate = dtpDate.getValue();
+		if (deliveryDate == null) {
+			System.out.println("ERROR: Invalid date for variation save: " + dtpDate.getEditor().getText());
+			showAlert("Invalid Date", "Enter a valid date in dd/mm/yyyy format", Alert.AlertType.ERROR);
+			return false;
+		}
+		return true;
 	}
 
-	void showMsg(String msg) {
-		Alert al = new Alert(AlertType.ERROR);
-		al.setTitle("ERROR");
-		al.setContentText(msg);
-		al.show();
+	private boolean isCustomCowMilkQtyValid() {
+		String cowMilkQty = txtCq.getText();
+		if(!isNumber(cowMilkQty) || Float.parseFloat(cowMilkQty) < 0) {
+			System.out.println("ERROR: User tried saving with negative value for cow milk qty");
+			showAlert("Invalid Cow Milk Qty", "Put a non-negative (zero or above) value in Cow Milk Qty", AlertType.ERROR);
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isCustomBuffaloMilkQtyValid() {
+		String buffaloMilkQty = txtBq.getText();
+		if(!isNumber(buffaloMilkQty) || Float.parseFloat(buffaloMilkQty) < 0) {
+			System.out.println("ERROR: User tried saving with negative value for buffalo milk qty");
+			showAlert("Invalid Buffalo Milk Qty", "Put a non-negative (zero or above) value in Buffalo Milk Qty", AlertType.ERROR);
+			return false;
+		}
+		return true;
+	}
+
+	@FXML
+	void doSave(ActionEvent event) {
+		String sname = listCust.getSelectionModel().getSelectedItem();
+		// no need of isBlank validation on sname since listView is readOnly, and sname are fetched from db itself.
+		if (sname == null) {
+			System.out.println("ERROR: Variation save attempted without selecting a customer");
+			showAlert("Select Customer", "Select a customer before saving variation", AlertType.ERROR);
+			return;
+		}
+		if (!isCustomCowMilkQtyValid() || !isCustomBuffaloMilkQtyValid() || !isDeliveryDateValid()) {
+			System.out.println("ERROR: Validation failure before variation save");
+			return;
+		}
+		float cowMilkQty = 0;
+		float buffaloMilkQty = 0;
+		if (chkNil.isSelected()) {
+			// no validation required on lbl texts since they are coming from db and are read-only.
+			// negative value is used to neutralize consumption of that particular day upon billing
+			cowMilkQty = -Float.parseFloat(lblCq.getText());
+			buffaloMilkQty = -Float.parseFloat(lblBq.getText());
+		} else {
+			cowMilkQty = Float.parseFloat(txtCq.getText());
+			buffaloMilkQty = Float.parseFloat(txtBq.getText());
+		}
+		try {
+			PreparedStatement pst = con.prepareStatement("insert into variationconsole values(?,?,?,?)");
+			pst.setString(1, sname);
+			pst.setDate(2, java.sql.Date.valueOf(dtpDate.getValue()));
+			pst.setFloat(3, cowMilkQty);
+			pst.setFloat(4, buffaloMilkQty);
+
+			int rowsAffected = pst.executeUpdate();
+			if (rowsAffected == 1) {
+				System.out.println("INFO: Variation stored for customer " + sname + " for date: " +  dtpDate.getValue() + ", cow: " + cowMilkQty + ", buffalo: " + buffaloMilkQty);
+				showAlert("Variation Logged", "Variation logged for customer " + sname + " for date: " +  dtpDate.getValue() + ", cow: " + cowMilkQty + ", buffalo: " + buffaloMilkQty, AlertType.INFORMATION);
+				listCust.getItems().remove(sname);
+			} else {
+				System.out.println("ERROR: Error in storing variation for customer  " + sname + " for date: " + dtpDate.getValue() + ", cow: " + cowMilkQty + ", buffalo: " + buffaloMilkQty);
+				showAlert("Save Error", "Unknown error in saving variation for customer " + sname + " for date: " + dtpDate.getValue() + ", cow: " + cowMilkQty + ", buffalo: " + buffaloMilkQty + ". Please reach out to the team.", AlertType.ERROR);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@FXML
 	void doDoubleClick(MouseEvent event) {
 		if (event.getClickCount() == 2) {
-			imgCustomer.setVisible(false);
 			imgNoFace.setVisible(false);
-			String name = listCust.getSelectionModel().getSelectedItem();
-			// System.out.println("Worked");
+			imgCustomer.setVisible(true);
+			String name = listCust.getSelectionModel().getSelectedItem(); // since the list is read-only, there's no need to validate sname.
 			try {
 				PreparedStatement pst = con.prepareStatement("select cq,bq,imgpath from customerentry where sname=?");
 				pst.setString(1, name);
 				ResultSet table = pst.executeQuery();
-				table.next();
+				if (!table.next()) {
+					System.out.println("ERROR: (Rare) Customer deleted from backend after retrieval");
+					showAlert("Invalid Customer", "Looks like the customer record got deleted from backend. It's a rare event, check with team", AlertType.ERROR);
+					return;
+				}
+				// default subscription values are filled in. lblCq, lblBq are for reference only.
 				lblCq.setText(String.valueOf(table.getFloat("cq")));
 				lblBq.setText(String.valueOf(table.getFloat("bq")));
-				// txtCq.setText(String.valueOf(-table.getFloat("cq"))); OPTIONAL TO KEEP[ (as
-				// stated below)]
-				// txtBq.setText(String.valueOf(-table.getFloat("bq"))); OPTIONAL TO KEEP[a
-				// replacement to chkNil]
-				String path = table.getString("imgpath");
-				if (path.equals("nil"))
+				txtCq.setText(String.valueOf(table.getFloat("cq")));
+			 	txtBq.setText(String.valueOf(table.getFloat("bq")));
+
+				String path = table.getString("imgpath"); // URI.toString()
+				if (path.equals("nil")) {
+					imgCustomer.setVisible(false);
 					imgNoFace.setVisible(true);
+				}
 				else {
-					imgCustomer.setImage(new Image(path));
+					imgNoFace.setVisible(false);
 					imgCustomer.setVisible(true);
+					imgCustomer.setImage(new Image(path));
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -170,7 +208,8 @@ public class VariationConsoleController {
 		}
 	}
 
-	private void fillList() {
+	private void resetAndFillOnboardedCustomers() {
+		listCust.getItems().clear();
 		ArrayList<String> ary = new ArrayList<>();
 		try {
 			PreparedStatement pst = con.prepareStatement("select sname from customerentry");
@@ -188,10 +227,7 @@ public class VariationConsoleController {
 	@FXML
 	void initialize() {
 		con = DBConnection.doConnect();
-		fillList();
-		listCust.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		imgNoFace.setVisible(false);
-		lblCq.setText("0");
-		lblBq.setText("0");
+		listCust.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); // this is purely from the pov of deleting customers which don't have a variation in milk delivered on a particular day.
+		reset();
 	}
 }

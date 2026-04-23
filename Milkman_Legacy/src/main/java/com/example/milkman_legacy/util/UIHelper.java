@@ -22,4 +22,14 @@ public class UIHelper {
         }
         return desktopPath;
     }
+
+    public static boolean isNumber(String value) {
+        try {
+            Float.parseFloat(value);
+            return true;
+        } catch(NumberFormatException | NullPointerException n){
+            System.out.println(value + " isn't a number");
+            return false;
+        }
+    }
 }
