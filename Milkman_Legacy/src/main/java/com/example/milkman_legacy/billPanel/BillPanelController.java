@@ -228,7 +228,7 @@ public class BillPanelController {
 				if (table.next()) {
 					// IMP: getBoolean() for null gives false by default. getString is always safe.
 					String minStatus = table.getString("minStatus");
-					if (minStatus != null && minStatus == "0") {
+					if (minStatus != null && "0".equals(minStatus)) {
 						isPendingBill = true;
 					}
 					customerLastBillEndDate = table.getDate("customerLastBillEndDate");

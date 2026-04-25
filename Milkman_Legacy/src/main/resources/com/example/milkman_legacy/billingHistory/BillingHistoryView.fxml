@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="550.0" prefWidth="550.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.milkman_legacy.billingHistory.BillingHistoryController">
+<AnchorPane prefHeight="550.0" prefWidth="550.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.milkman_legacy.billingHistory.BillingHistoryController">
    <children>
       <ImageView fitHeight="478.0" fitWidth="550.0" layoutY="35.0" opacity="0.81" pickOnBounds="true">
          <image>
@@ -45,32 +45,32 @@
             <Font name="Georgia" size="14.0" />
          </font>
       </Label>
-      <Label alignment="CENTER_RIGHT" layoutX="11.0" layoutY="178.0" prefHeight="19.0" prefWidth="82.0" text="Bill Status">
+      <Label alignment="CENTER_RIGHT" layoutX="33.0" layoutY="178.0" prefHeight="19.0" prefWidth="82.0" text="Bill Status">
          <font>
             <Font name="Georgia" size="16.0" />
          </font>
       </Label>
-      <Button layoutX="385.0" layoutY="109.0" mnemonicParsing="false" onAction="#doShowAll" prefHeight="16.0" prefWidth="130.0" text="Whole Record">
+      <Button layoutX="385.0" layoutY="109.0" mnemonicParsing="false" onAction="#doShowAll" prefHeight="16.0" prefWidth="130.0" text="All Records">
          <font>
             <Font name="Georgia Bold" size="15.0" />
          </font>
       </Button>
-      <Button layoutX="252.0" layoutY="111.0" mnemonicParsing="false" onAction="#doShow" prefHeight="24.0" prefWidth="108.0" text="Show History">
+      <Button layoutX="252.0" layoutY="111.0" mnemonicParsing="false" onAction="#doShowHistory" prefHeight="24.0" prefWidth="108.0" text="Show History">
          <font>
             <Font name="Georgia" size="14.0" />
          </font>
       </Button>
       <Separator layoutX="372.0" layoutY="104.0" orientation="VERTICAL" prefHeight="40.0" prefWidth="0.0" />
       <Separator layoutX="92.0" layoutY="162.0" prefHeight="0.0" prefWidth="335.0" />
-      <RadioButton layoutX="93.0" layoutY="211.0" mnemonicParsing="false" onAction="#doPaid" text="Paid">
+      <RadioButton layoutX="158.0" layoutY="177.0" mnemonicParsing="false" onAction="#doPaid" text="Paid">
          <font>
             <Font size="15.0" />
          </font>
          <toggleGroup>
-            <ToggleGroup fx:id="alternate" />
+            <ToggleGroup fx:id="billStatusToggleGroup" />
          </toggleGroup>
       </RadioButton>
-      <RadioButton layoutX="216.0" layoutY="211.0" mnemonicParsing="false" onAction="#doUnpaid" text="Unpaid" toggleGroup="$alternate">
+      <RadioButton layoutX="260.0" layoutY="177.0" mnemonicParsing="false" onAction="#doUnpaid" text="Unpaid" toggleGroup="$billStatusToggleGroup">
          <font>
             <Font size="15.0" />
          </font>

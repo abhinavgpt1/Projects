@@ -1,6 +1,6 @@
 package com.example.milkman_legacy.billingHistory;
 
-public class CustomerBean {
+public class BillPanelBean {
 	private String name;
 	private String Bdos;
 	private String Bdoe;
@@ -9,7 +9,7 @@ public class CustomerBean {
 	private float Bbqty;
 	private String Bstatus;
 
-	public CustomerBean(String name, String bdos, String bdoe, float bamt, float bcqty, float bbqty, String bstatus) {
+	public BillPanelBean(String name, String bdos, String bdoe, float bamt, float bcqty, float bbqty, String bstatus) {
 		super();
 		this.name = name;
 		Bdos = bdos;
