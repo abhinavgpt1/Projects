@@ -39,14 +39,12 @@ public class IncomeRecordController {
     @FXML
     void doTotal(ActionEvent event) {
         try {
-            PreparedStatement pst = con
-                    .prepareStatement("select sum(amount) from billpanel where status=? and dos>=? and doe<=?");
-            pst.setBoolean(1, true);
-            pst.setDate(2, java.sql.Date.valueOf(dtpDoF.getValue()));
-            pst.setDate(3, java.sql.Date.valueOf(dtpDoT.getValue()));
+            PreparedStatement pst = con.prepareStatement("select sum(amount) from billpanel where status=true and dos>=? and doe<=?");
+            pst.setDate(1, java.sql.Date.valueOf(dtpDoF.getValue()));
+            pst.setDate(2, java.sql.Date.valueOf(dtpDoT.getValue()));
             ResultSet table = pst.executeQuery();
             table.next();
-            lblAmt.setText(String.valueOf(table.getFloat("sum(amount)")));
+            lblAmt.setText(String.valueOf(table.getFloat("sum(amount)"))); // 0 if no records applicable (includes empty table case too)
         } catch (SQLException e) {
             e.printStackTrace();
         }

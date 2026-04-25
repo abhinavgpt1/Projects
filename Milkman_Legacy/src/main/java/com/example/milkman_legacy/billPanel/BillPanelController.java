@@ -226,7 +226,9 @@ public class BillPanelController {
 				pst.setString(1, sname);
 				ResultSet table = pst.executeQuery();
 				if (table.next()) {
-					if (table.getBoolean("minStatus") == false) {
+					// IMP: getBoolean() for null gives false by default. getString is always safe.
+					String minStatus = table.getString("minStatus");
+					if (minStatus != null && minStatus == "0") {
 						isPendingBill = true;
 					}
 					customerLastBillEndDate = table.getDate("customerLastBillEndDate");
@@ -296,7 +298,9 @@ public class BillPanelController {
 				showAlert("Save Error", errorMsg + ", please reach out to the team.", AlertType.ERROR);
 				return;
 			}
-			listCust.getItems().remove(sname); // remove the person from list once bill is saved (for month, generally). Use ResetAll to put another bill.
+			// remove the person from list once bill is saved (for month, generally).
+			// TODO: Add ResetAll to help put another bill for customer. How about multi-select bulk bill generation?
+			listCust.getItems().remove(sname);
 
 			// ***************SMS***********
 			// TODO: other mediums of notifications can be used here. This query can be removed if mobileNum is stored on doDoubleClick()
