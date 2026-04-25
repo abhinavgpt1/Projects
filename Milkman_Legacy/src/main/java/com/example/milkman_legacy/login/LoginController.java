@@ -26,6 +26,7 @@ import javafx.stage.Stage;
 
 import static com.example.milkman_legacy.Constants.DASHBOARD_VIEW;
 import static com.example.milkman_legacy.Constants.APP_LOGIN_SOUND;
+import static com.example.milkman_legacy.util.UIHelper.showAlert;
 
 public class LoginController {
 
@@ -45,55 +46,74 @@ public class LoginController {
 	private Button btnLogin; // Value injected by FXMLLoader
 
 	Connection con;
-	URL url;
-	AudioClip audio;
+
+	private boolean isLoginIdValid() {
+		String loginId = txtId.getText();
+		if(loginId == null || loginId.isBlank()) {
+			System.out.println("ERROR: Login id is null or blank: " + loginId);
+			showAlert("Invalid Login ID", "Enter a valid non-empty Login Id", Alert.AlertType.ERROR);
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isLoginPasswordValid() {
+		String loginPwd = txtPassword.getText();
+		if(loginPwd == null || loginPwd.isBlank()) {
+			System.out.println("ERROR: Login password is null or blank: " + loginPwd);
+			showAlert("Invalid Password", "Enter a valid non-empty password", Alert.AlertType.ERROR);
+			return false;
+		}
+		return true;
+	}
 
 	@FXML
 	void doLoginIn(ActionEvent event) {
-		if (txtId.getText().equals(""))
-			showMsg("Enter ID");
-		else if (txtPassword.getText().equals(""))
-			showMsg("Enter Password");
-		else {
-			try {
-				PreparedStatement pst = con.prepareStatement("select * from idpwd where id = ?");
-				pst.setString(1, txtId.getText());
-				ResultSet table = pst.executeQuery();
-				table.next();
-				String id = table.getString("id");
-				String pwd = table.getString("password");
-				if (id.equals(txtId.getText()) && pwd.equals(txtPassword.getText())) {
-					url = getClass().getResource(APP_LOGIN_SOUND);
-					audio = new AudioClip(url.toString());
-					audio.play();
-					try {
-						// 0.5sec wait to overlap between hearing sound while dashboard loads
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					Parent root = FXMLLoader.load(getClass().getResource(DASHBOARD_VIEW));
-					Scene scene = new Scene(root);
-					Stage stage = new Stage();
-					stage.setScene(scene);
-					stage.show();
-					Scene scene1 = (Scene) btnLogin.getScene();
-					scene1.getWindow().hide();
-					// IF the user forgets the password...then he/she has navicat installed LOL!
-				} else {
-					showMsg("Either ID or Password is Wrong");
+		if (!isLoginIdValid() || !isLoginPasswordValid())
+			return;
+		// If the admin / milkman forgets the password, then there's DB access
+		// TODO: add a signup and forgot password page
+		String query = "select * from idpwd where id = ?";
+		try (PreparedStatement pst = con.prepareStatement(query)) {
+			String loginIdInput = txtId.getText();
+			String loginPasswordInput = txtPassword.getText();
+			pst.setString(1, loginIdInput);
+			ResultSet table = pst.executeQuery();
+
+			if (table.next()) {
+				// UserId found, now validate password
+				String loginPwdDb = table.getString("password");
+				if (!loginPwdDb.equals(loginPasswordInput)) {
+					System.out.println("ERROR: Invalid password entered during login: " + loginPasswordInput);
+					showAlert("Invalid Password", "Wrong password. Please try another one.", AlertType.ERROR);
+					return;
 				}
-			} catch (Exception e) {
+			} else {
+				System.out.println("ERROR: Invalid login id entered during login: " + loginIdInput);
+				showAlert("Invalid Login ID", "No user found with this Login Id. Enter a valid one.", AlertType.ERROR);
+				return;
+			}
+
+			AudioClip audio = new AudioClip(getClass().getResource(APP_LOGIN_SOUND).toString());
+			audio.play();
+			try {
+				// 0.5sec wait to overlap between hearing sound while dashboard loads
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}
-	}
 
-	void showMsg(String msg) {
-		Alert al = new Alert(AlertType.ERROR);
-		al.setTitle("ERROR");
-		al.setContentText(msg);
-		al.show();
+			// Hide login window and display dashboard
+			Scene loginPageScene = btnLogin.getScene();
+			loginPageScene.getWindow().hide();
+
+			Scene scene = new Scene(FXMLLoader.load(getClass().getResource(DASHBOARD_VIEW)));
+			Stage stage = new Stage();
+			stage.setScene(scene);
+			stage.show();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@FXML
