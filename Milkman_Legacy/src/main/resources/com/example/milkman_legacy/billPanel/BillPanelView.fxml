@@ -51,7 +51,7 @@
             <Font name="Georgia" size="13.0" />
          </font>
       </Label>
-      <Button layoutX="447.0" layoutY="515.0" mnemonicParsing="false" onAction="#doSaveSms" prefHeight="33.0" prefWidth="91.0" text="Save &amp; SMS">
+      <Button layoutX="447.0" layoutY="515.0" mnemonicParsing="false" onAction="#doSaveAndSms" prefHeight="33.0" prefWidth="91.0" text="Save &amp; SMS">
          <font>
             <Font size="13.0" />
          </font></Button>

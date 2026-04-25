@@ -19,13 +19,13 @@ CREATE TABLE customerentry (
 );
 
 CREATE TABLE billpanel (
-    sname VARCHAR(255) PRIMARY KEY,
-    status BOOLEAN DEFAULT FALSE,
+    sname VARCHAR(255) NOT NULL,
+    dos DATE NOT NULL,
+    doe DATE NOT NULL,
+    amount FLOAT,
     cqty FLOAT,
     bqty FLOAT,
-    amount FLOAT,
-    dos DATE NOT NULL,
-    doe DATE NOT NULL
+    status BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE variationconsole (

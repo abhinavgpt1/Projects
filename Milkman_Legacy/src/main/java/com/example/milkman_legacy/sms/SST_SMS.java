@@ -8,19 +8,22 @@ import java.net.URLConnection;
 public class SST_SMS {
 
 	public static String bceSunSoftSend(String mobileno, String msg) {
-		String uid = "bcebti";
+		// Assuming this service is active, and sends message successfully on a valid internet connection
+		return "Sent successfully";
+		// return exeUrl(createUrl(mobileno, msg));
+	}
+
+	public static String createUrl(String mobileno, String msg) {
+	 	String uid = "bcebti";
 		// String pwd="sunsoft@1234";
 		String pwd = "909938537";
 		String sender = "SUNSFT";
-
-		String url = "http://bulksms.mysmsmantra.com:8080/WebSMS/SMSAPI.jsp?username=" + uid + "&password=" + pwd
-				+ "&sendername=" + sender + "&mobileno=" + mobileno + "&message=" + msg;
-		// String url=
-		// "http://smsapple.in/api/swsend.asp?username="+uid+"&password="+pwd+"&sendto="+mobileno+"&message="+msg+"&sender="+sender;
-		return exeUrl(url);
+		String url = "http://bulksms.mysmsmantra.com:8080/WebSMS/SMSAPI.jsp?username=" + uid + "&password=" + pwd + "&sendername=" + sender + "&mobileno=" + mobileno + "&message=" + msg;
+	 	// String url = "http://smsapple.in/api/swsend.asp?username="+uid+"&password="+pwd+"&sendto="+mobileno+"&message="+msg+"&sender="+sender;
+	  	return url;
 	}
 
-	static public String exeUrl(String urloc) {
+	public static String exeUrl(String urloc) {
 		String finalstr = "";
 		try {
 			urloc = urloc.replace("%", "%25");

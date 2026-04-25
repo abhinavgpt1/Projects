@@ -6,10 +6,10 @@ package com.example.milkman_legacy.billPanel;
 
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -26,6 +26,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+
+import static com.example.milkman_legacy.util.UIHelper.showAlert;
 
 public class BillPanelController {
 
@@ -74,198 +76,283 @@ public class BillPanelController {
 	private ImageView imgCust; // Value injected by FXMLLoader
 
 	Connection con;
+	private Date dateOfSubscriptionStart = null;
+	private boolean isPendingBill = false;
+	private Date customerLastBillEndDate = null;
+	private float netCowMilkQtyPurchased = 0;
+	private float netBuffaloMilkQtyPurchased = 0;
 
-	@FXML
-	void doGetVariation(ActionEvent event) {
-		String name = listCust.getSelectionModel().getSelectedItem();
-
-		try {
-			// if dtpdoe<dtpdos
-			if (dtpDoe.getValue().isBefore(dtpDos.getValue()))
-				showMsg("Date of End cannot be before Date of Start");
-			// if dtpdos<dos
-			else {
-				PreparedStatement pst = con.prepareStatement("select dos from customerentry where sname=?");
-				pst.setString(1, name);
-				ResultSet table = pst.executeQuery();
-				table.next();
-				LocalDate dos = LocalDate.parse(table.getDate("dos").toString());
-
-				if (dtpDos.getValue().isBefore(dos))
-					showMsg("'Date of Start' is before customer's dos");
-				else {
-					pst = con.prepareStatement("select sname from billpanel");
-					table = pst.executeQuery();
-					boolean test = false;
-					// check if name exists in bill panel
-					while (table.next()) {
-						if (table.getString("sname").equals(name)) {
-							test = true;
-							break;
-						}
-
-					}
-					if (test == true) {
-						// getting the status of person(to check if there is "a" pending bill)
-						pst = con.prepareStatement("select min(status) from billpanel where sname = ?");
-						pst.setString(1, name);
-						table = pst.executeQuery();
-						table.next();
-
-					}
-					// test==false means first time variation of person
-					if (test == false || (test && table.getBoolean("min(status)"))) {// for first time variation or if
-																						// person has cleared all bills
-
-						if ((test && table.getBoolean("min(status)"))) {// if person exits and has cleared all bills
-							pst = con.prepareStatement("select max(doe) from billpanel where sname=? ");
-							pst.setString(1, name);
-							table = pst.executeQuery();
-							table.next();
-							// checking if dtpdos isn't before latest doe
-							if (dtpDos.getValue().isBefore(LocalDate.parse(table.getDate("max(doe)").toString()))
-									|| dtpDos.getValue().isEqual(LocalDate.parse(table.getDate("max(doe)").toString())))
-								showMsg("DOS entered is less than or equal to the the latest PAID bill date");
-						}
-
-						pst = con.prepareStatement(
-								"select sum(cq),sum(bq) from variationconsole where sname=?  and cdate>=? and cdate<=?");
-						pst.setString(1, name);
-
-						pst.setDate(2, java.sql.Date.valueOf(dtpDos.getValue()));
-						pst.setDate(3, java.sql.Date.valueOf(dtpDoe.getValue()));
-						table = pst.executeQuery();
-						table.next();
-
-						lblVCq.setText(String.valueOf(table.getFloat("sum(cq)")));
-						lblVBq.setText(String.valueOf(table.getFloat("sum(bq)")));
-					} else
-						showMsg("Your Bill is Pending");
-				}
-			}
-
+	private boolean isNameSelected() {
+		String selectedName = listCust.getSelectionModel().getSelectedItem();
+		if(selectedName == null || selectedName.isBlank()) {
+			System.out.println("ERROR: Name not selected: " + selectedName);
+			showAlert("Select Name", "Select a name from customer list to proceed further", Alert.AlertType.ERROR);
+			return false;
 		}
-
-		catch (SQLException e) {
-			e.printStackTrace();
-		}
+		return true;
 	}
 
-	void showMsg(String msg) {
-		Alert al = new Alert(AlertType.ERROR);
-		al.setTitle("Error");
-		al.setContentText(msg);
-		al.show();
+	private boolean isDateOfStartValid() {
+		if (dtpDos.getValue() == null) {
+			System.out.println("ERROR: Invalid date of start: " + dtpDos.getEditor().getText());
+			showAlert("Invalid Date of Start", "Enter a valid date in dd/mm/yyyy format", Alert.AlertType.ERROR);
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isDateOfEndValid() {
+		if (dtpDoe.getValue() == null) {
+			System.out.println("ERROR: Invalid date of end: " + dtpDoe.getEditor().getText());
+			showAlert("Invalid Date of End", "Enter a valid date in dd/mm/yyyy format", Alert.AlertType.ERROR);
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isDateOfStartBeforeOrEqualsDateOfEnd() {
+		if (dtpDos.getValue().isAfter(dtpDoe.getValue())) {
+			String errorMsg = String.format("Date of Start (%s) is greater than Date of End (%s)", dtpDos.getValue(), dtpDoe.getValue());
+			System.out.println("ERROR: " + errorMsg);
+			showAlert("Invalid Date Range", errorMsg, Alert.AlertType.ERROR);
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isDateOfStartAfterOrEqualsDateOfSubscription() {
+		// Rule: during onboarding, dateOfSubscriptionStart is set. So, it can't be invalid.
+		if(dtpDos.getValue().isBefore(dateOfSubscriptionStart.toLocalDate())) {
+			String errorMsg = String.format("Date of start (%s) can't be before customer's date of subscription start (%s). This will cause misleading bills", dtpDos.getValue(), dateOfSubscriptionStart);
+			System.out.println("ERROR: " + errorMsg);
+			showAlert("Invalid Date of Start", errorMsg, AlertType.ERROR);
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isDateOfStartAfterCustomerLastBillEndDate() {
+		// Do not generate bill over a range which contains last bill's end date to avoid overlap
+		if (customerLastBillEndDate == null || dtpDos.getValue().isAfter(customerLastBillEndDate.toLocalDate()))
+			return true;
+		String errorMsg = String.format("Date of start (%s) can't be before/equal to customer's last bill date (%s). This will cause overlapping bills", dtpDos.getValue(), customerLastBillEndDate);
+		System.out.println("ERROR: " + errorMsg);
+		showAlert("Invalid Date of Start", errorMsg, AlertType.ERROR);
+		return false;
+	}
+
+	private boolean isValidDateRange() {
+		return isDateOfStartValid() && isDateOfEndValid() && isDateOfStartBeforeOrEqualsDateOfEnd()
+				&& isDateOfStartAfterOrEqualsDateOfSubscription() && isDateOfStartAfterCustomerLastBillEndDate();
+	}
+
+	private boolean arePendingBillsCleared() {
+		if (!isPendingBill) {
+			return true;
+		}
+		String sname = listCust.getSelectionModel().getSelectedItem(); // assuming name would be validated before this validation. If not, nothing break otherwise.
+		String errorMsg = String.format("Clear pending bills for %s before this operation", sname);
+		System.out.println("ERROR: " + errorMsg);
+		showAlert("Invalid Operation", errorMsg, AlertType.ERROR);
+		return false;
+	}
+
+	@FXML
+	boolean doGetVariation(ActionEvent event) {
+		// Rule: If customer has any unpaid bill, then getVariation isn't done => generateBill and save&Sms shouldn't be done either.
+		// TODO: Ideally this shouldn't be the case. We should save the new bill, and send sms to clear pending bills.
+
+		if(!isNameSelected() || !isValidDateRange() || !arePendingBillsCleared()) {
+			return false;
+		}
+		String sname = listCust.getSelectionModel().getSelectedItem();
+		try {
+			// Rule: Start Date and End Date for a bill are inclusive.
+			PreparedStatement pst = con.prepareStatement("select sum(cq), sum(bq) from variationconsole where sname=? and cdate>=? and cdate<=?");
+			pst.setString(1, sname);
+			pst.setDate(2, Date.valueOf(dtpDos.getValue()));
+			pst.setDate(3, Date.valueOf(dtpDoe.getValue()));
+			ResultSet table = pst.executeQuery();
+			if (table.next()) {
+				lblVCq.setText(String.valueOf(table.getFloat("sum(cq)")));
+				lblVBq.setText(String.valueOf(table.getFloat("sum(bq)")));
+			} else {
+				String errorMsg = "Persistence error in fetching customer's variation details: " + sname + " for dates: (" + dtpDos.getValue() + ", " + dtpDoe.getValue() + ")";
+				System.out.println("ERROR: " + errorMsg);
+				showAlert("Database Error", errorMsg + ", please reach out to the team.", AlertType.ERROR);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return true;
 	}
 
 	@FXML
 	void doDoubleClick(MouseEvent event) {
 		if (event.getClickCount() == 2) {
-			// getting info
-			String name = listCust.getSelectionModel().getSelectedItem();
+			// Get selected customer's contracted consumption values
+			String sname = listCust.getSelectionModel().getSelectedItem(); // no need for validation on name since listCust is read-only and sname are coming directly from db.
 			try {
-				imgNoFace.setVisible(false);
-				imgCust.setVisible(false);
-				PreparedStatement pst = con
-						.prepareStatement("select cq,cprice,bq,bprice,imgpath from customerentry where sname=? ");
-				pst.setString(1, name);
-				// pst.executeUpdate(); IS WRONG HERE
+				PreparedStatement pst = con.prepareStatement("select cq,cprice,bq,bprice,dos,imgpath from customerentry where sname=?");
+				pst.setString(1, sname);
 				ResultSet table = pst.executeQuery();
-				table.next();
-				lblCq.setText(String.valueOf(table.getFloat("cq")));
-				lblCp.setText(String.valueOf(table.getFloat("cprice")));
-				lblBq.setText(String.valueOf(table.getFloat("bq")));
-				lblBp.setText(String.valueOf(table.getFloat("bprice")));
-				String path = table.getString("imgpath");
-				if (path.equals("nil")) {
-					imgNoFace.setVisible(true);
+				if(table.next()) {
+					lblCq.setText(String.valueOf(table.getFloat("cq")));
+					lblCp.setText(String.valueOf(table.getFloat("cprice")));
+					lblBq.setText(String.valueOf(table.getFloat("bq")));
+					lblBp.setText(String.valueOf(table.getFloat("bprice")));
+					dateOfSubscriptionStart = table.getDate("dos"); // saved for later
+					dtpDos.setValue(dateOfSubscriptionStart.toLocalDate());
+					String path = table.getString("imgpath");
+					if (path.equals("nil")) {
+						imgCust.setVisible(false);
+						imgNoFace.setVisible(true);
+					} else {
+						imgNoFace.setVisible(false);
+						imgCust.setImage(new Image(path));
+						imgCust.setVisible(true);
+					}
 				} else {
-					imgCust.setImage(new Image(path));
-					imgCust.setVisible(true);
+					String errorMsg = "Persistence issue while fetching customer's consumption details: " + sname;
+					System.out.println("ERROR: " + errorMsg);
+					showAlert("Database Error", errorMsg + ", please reach out to the team.", AlertType.ERROR);
 				}
-
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 
+			try {
+				PreparedStatement pst = con.prepareStatement("select min(status) as minStatus, max(doe) as customerLastBillEndDate from billpanel where sname = ?");
+				pst.setString(1, sname);
+				ResultSet table = pst.executeQuery();
+				if (table.next()) {
+					if (table.getBoolean("minStatus") == false) {
+						isPendingBill = true;
+					}
+					customerLastBillEndDate = table.getDate("customerLastBillEndDate");
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+			// fyi, dateOfSubscriptionStart and customerLastBillEndDate are by default null. isPendingBill is by default false.
 		}
 	}
 
 	@FXML
-	void doBill(ActionEvent event) {
-		// calculating bill
-		LocalDate dos1 = dtpDos.getValue();
-		LocalDate doe1 = dtpDoe.getValue();
-		long days = ChronoUnit.DAYS.between(dos1, doe1);
-		lblDays.setText(String.valueOf(days));
-		float bill = 0;
-		bill = (Float.parseFloat(lblCq.getText()) * Float.parseFloat(lblDays.getText())
-				+ Float.parseFloat(lblVCq.getText())) * Float.parseFloat(lblCp.getText())
-				+ (Float.parseFloat(lblBq.getText()) * Float.parseFloat(lblDays.getText())
-						+ Float.parseFloat(lblVBq.getText())) * Float.parseFloat(lblBp.getText());
-		lblBill.setText(String.valueOf((bill)));
+	boolean doBill(ActionEvent event) {
+		if(!doGetVariation(event)) {
+			System.out.println("ERROR: Get Variation failed");
+			return false;
+		}
+
+		// Bill calculation
+		long days = ChronoUnit.DAYS.between(dtpDos.getValue(), dtpDoe.getValue()) + 1; // DOE should be inclusive
+		float fixedCowMilkQty = Float.parseFloat(lblCq.getText());
+		float variationCowMilkQty = Float.parseFloat(lblVCq.getText());
+		float fixedCowMilkPrice = Float.parseFloat(lblCp.getText());
+		netCowMilkQtyPurchased = (fixedCowMilkQty * days + variationCowMilkQty); // saved for later
+		float cowMilkBill = netCowMilkQtyPurchased * fixedCowMilkPrice;
+
+		float fixedBuffaloMilkQty = Float.parseFloat(lblBq.getText());
+		float variationBuffaloMilkQty = Float.parseFloat(lblVBq.getText());
+		float fixedBuffaloMilkPrice = Float.parseFloat(lblBp.getText());
+		netBuffaloMilkQtyPurchased = (fixedBuffaloMilkQty * days + variationBuffaloMilkQty);
+		float buffaloMilkBill = netBuffaloMilkQtyPurchased * fixedBuffaloMilkPrice; // saved for later
+
+		float totalBill = cowMilkBill + buffaloMilkBill;
+		lblDays.setText(String.valueOf(days)); // TODO: this should be set when DOE is selected
+		lblBill.setText(String.valueOf(totalBill));
+		return true;
+		// TODO: what if a user who's not a buffalo milk consumer, someday wants to purchase it? You should have provision for price in Variation console
+		// TODO: Bug: if a customer who doesn't purchase buffalo milk, has a variation of buffalo milk, then since BuffaloMilkPrice = 0 (in contract), final bill won't be affected it.
 	}
 
 	@FXML
-	void doSaveSms(ActionEvent event) {
-		String name = listCust.getSelectionModel().getSelectedItem();
-		try {
+	void doSaveAndSms(ActionEvent event) {
+		if(!doBill(event)) {
+			System.out.println("ERROR: Bill generation failed");
+			return;
+		}
 
-			PreparedStatement pst = con.prepareStatement("insert into billpanel values(null,?,?,?,?,?,?,?)");
-			pst.setString(1, name);
+		String sname = listCust.getSelectionModel().getSelectedItem();
+		try {
+			PreparedStatement pst = con.prepareStatement("insert into billpanel values(?,?,?,?,?,?,?)");
+			pst.setString(1, sname);
 			pst.setDate(2, java.sql.Date.valueOf(dtpDos.getValue()));
 			pst.setDate(3, java.sql.Date.valueOf(dtpDoe.getValue()));
 			pst.setFloat(4, Float.parseFloat(lblBill.getText()));
-			float cqty = Float.parseFloat(lblCq.getText()) + Float.parseFloat(lblVCq.getText());
-			pst.setFloat(5, cqty);
-			float bqty = Float.parseFloat(lblBq.getText()) + Float.parseFloat(lblVBq.getText());
-			pst.setFloat(6, bqty);
+			pst.setFloat(5, netCowMilkQtyPurchased);
+			pst.setFloat(6, netBuffaloMilkQtyPurchased);
 			pst.setBoolean(7, false);
-			pst.executeUpdate();
-			listCust.getItems().remove(name);
+			int rowsAffected = pst.executeUpdate();
+			if (rowsAffected == 1) {
+				String infoMessage = String.format("Bill saved for customer (%s) for dates (%s, %s)", sname, dtpDos.getValue(), dtpDoe.getValue());
+				System.out.println("INFO: " + infoMessage);
+				// showAlert("Bill Saved", infoMessage , AlertType.INFORMATION); // can skip since we have alert on sms success.
+			} else {
+				String errorMsg = String.format("Error in storing bill for customer (%s) for dates (%s, %s)", sname, dtpDos.getValue(), dtpDoe.getValue());
+				System.out.println("ERROR: " + errorMsg);
+				showAlert("Save Error", errorMsg + ", please reach out to the team.", AlertType.ERROR);
+				return;
+			}
+			listCust.getItems().remove(sname); // remove the person from list once bill is saved (for month, generally). Use ResetAll to put another bill.
 
 			// ***************SMS***********
+			// TODO: other mediums of notifications can be used here. This query can be removed if mobileNum is stored on doDoubleClick()
+			// TODO: Bug: Mobile isn't a required field for customer, so following code can fail.
 			pst = con.prepareStatement("select mobile from customerentry where sname=?");
-			pst.setString(1, name);
+			pst.setString(1, sname);
 			ResultSet table = pst.executeQuery();
-			table.next();
-			String mob = table.getString("mobile");
-			String s = "YOUR BILL FOR DATE " + dtpDos.getEditor().getText() + " TO " + dtpDoe.getEditor().getText()
-					+ " IS PENDING.\nKINDLY, PAY IT ON TIME.";
-			System.out.println(s);
-			String resp = SST_SMS.bceSunSoftSend(mob, s);
-			if (resp.contains("Exception"))
-				showMsg("Check Internet Connection");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
+			if (table.next()) {
+				String mobileNumber = table.getString("mobile");
+				final String warningMessage = "KINDLY, PAY IT ON TIME TO AVOID SUBSCRIPTION CANCELLATION AND PENALTY.";
+				String mobileMessage = String.format("Your bill for date %s to %s is pending.\n%s", dtpDos.getValue(), dtpDoe.getValue(), warningMessage);
 
-	void fillList() {
-		ArrayList<String> asl = new ArrayList<>();
-		try {
-			PreparedStatement pst = con.prepareStatement("select sname from customerentry");
-			ResultSet table = pst.executeQuery();
-			while (table.next()) {
-				String name = table.getString("sname");
-				asl.add(name);
+				String resp = SST_SMS.bceSunSoftSend(mobileNumber, mobileMessage);
+				if (resp.contains("Exception")) {
+					String errorMsg = String.format("Failed to sent SMS for customer (%s) for bill date (%s, %s). Contact the service provider, or check the internet connection and try again", sname, dtpDos.getValue(), dtpDoe.getValue());
+					System.out.println("ERROR: " + errorMsg);
+					showAlert("SMS Failed", errorMsg, AlertType.ERROR);
+				} else {
+					String infoMessage = String.format("Bill saved and sent to customer (%s) for dates (%s, %s)", sname, dtpDos.getValue(), dtpDoe.getValue());
+					System.out.println("INFO: " + infoMessage);
+					showAlert("Bill Sent", infoMessage, AlertType.INFORMATION);
+				}
+			} else {
+				String errorMsg = "Persistence error in fetching customer's mobile number: " + sname;
+				System.out.println("ERROR: " + errorMsg);
+				showAlert("Database Error", errorMsg + ", please reach out to the team.", AlertType.ERROR);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		listCust.getItems().addAll(asl);
+	}
+
+	private void fillOnboardedCustomers() {
+		ArrayList<String> customers = new ArrayList<>();
+		try {
+			PreparedStatement pst = con.prepareStatement("select sname from customerentry");
+			ResultSet table = pst.executeQuery();
+			while (table.next()) {
+				customers.add(table.getString("sname"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		listCust.getItems().addAll(customers);
 	}
 
 	@FXML
 	void initialize() {
 		con = DBConnection.doConnect();
-		imgNoFace.setVisible(false);
+		imgNoFace.setVisible(true);
+		fillOnboardedCustomers();
 		lblBp.setText("0");
 		lblCp.setText("0");
 		lblCq.setText("0");
 		lblBq.setText("0");
 		lblVBq.setText("0");
 		lblVCq.setText("0");
-		fillList();
 	}
 }

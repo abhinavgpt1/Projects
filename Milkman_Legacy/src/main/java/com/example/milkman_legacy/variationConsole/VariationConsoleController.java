@@ -139,32 +139,38 @@ public class VariationConsoleController {
 			System.out.println("ERROR: Validation failure before variation save");
 			return;
 		}
-		float cowMilkQty = 0;
-		float buffaloMilkQty = 0;
+		float tmpCowMilkQty = Float.parseFloat(txtCq.getText());
+		float fixedCowMilkQty = Float.parseFloat(lblCq.getText());
+		float tmpBuffaloMilkQty = Float.parseFloat(txtBq.getText());
+		float fixedBuffaloMilkQty = Float.parseFloat(lblBq.getText());
+
+		float cowMilkQtyDifferential = 0;
+		float buffaloMilkQtyDifferential = 0;
 		if (chkNil.isSelected()) {
 			// no validation required on lbl texts since they are coming from db and are read-only.
 			// negative value is used to neutralize consumption of that particular day upon billing
-			cowMilkQty = -Float.parseFloat(lblCq.getText());
-			buffaloMilkQty = -Float.parseFloat(lblBq.getText());
+			cowMilkQtyDifferential = -fixedCowMilkQty;
+			buffaloMilkQtyDifferential = -fixedBuffaloMilkQty;
 		} else {
-			cowMilkQty = Float.parseFloat(txtCq.getText());
-			buffaloMilkQty = Float.parseFloat(txtBq.getText());
+			cowMilkQtyDifferential = tmpCowMilkQty - fixedCowMilkQty;
+			buffaloMilkQtyDifferential = tmpBuffaloMilkQty - fixedBuffaloMilkQty;
 		}
+
 		try {
 			PreparedStatement pst = con.prepareStatement("insert into variationconsole values(?,?,?,?)");
 			pst.setString(1, sname);
 			pst.setDate(2, java.sql.Date.valueOf(dtpDate.getValue()));
-			pst.setFloat(3, cowMilkQty);
-			pst.setFloat(4, buffaloMilkQty);
+			pst.setFloat(3, cowMilkQtyDifferential);
+			pst.setFloat(4, buffaloMilkQtyDifferential);
 
 			int rowsAffected = pst.executeUpdate();
 			if (rowsAffected == 1) {
-				System.out.println("INFO: Variation stored for customer " + sname + " for date: " +  dtpDate.getValue() + ", cow: " + cowMilkQty + ", buffalo: " + buffaloMilkQty);
-				showAlert("Variation Logged", "Variation logged for customer " + sname + " for date: " +  dtpDate.getValue() + ", cow: " + cowMilkQty + ", buffalo: " + buffaloMilkQty, AlertType.INFORMATION);
+				System.out.println("INFO: Variation stored for customer " + sname + " for date: " +  dtpDate.getValue() + ", cow: " + cowMilkQtyDifferential + ", buffalo: " + buffaloMilkQtyDifferential);
+				showAlert("Variation Logged", "Variation logged for customer " + sname + " for date: " +  dtpDate.getValue() + ", cow: " + cowMilkQtyDifferential + ", buffalo: " + buffaloMilkQtyDifferential, AlertType.INFORMATION);
 				listCust.getItems().remove(sname);
 			} else {
-				System.out.println("ERROR: Error in storing variation for customer  " + sname + " for date: " + dtpDate.getValue() + ", cow: " + cowMilkQty + ", buffalo: " + buffaloMilkQty);
-				showAlert("Save Error", "Unknown error in saving variation for customer " + sname + " for date: " + dtpDate.getValue() + ", cow: " + cowMilkQty + ", buffalo: " + buffaloMilkQty + ". Please reach out to the team.", AlertType.ERROR);
+				System.out.println("ERROR: Error in storing variation for customer  " + sname + " for date: " + dtpDate.getValue() + ", cow: " + cowMilkQtyDifferential + ", buffalo: " + buffaloMilkQtyDifferential);
+				showAlert("Save Error", "Unknown error in saving variation for customer " + sname + " for date: " + dtpDate.getValue() + ", cow: " + cowMilkQtyDifferential + ", buffalo: " + buffaloMilkQtyDifferential + ". Please reach out to the team.", AlertType.ERROR);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -226,6 +232,8 @@ public class VariationConsoleController {
 
 	@FXML
 	void initialize() {
+		// TODO: use single imageView and render default or customer photo at runtime. Don't maintain 2 imageView.
+		// TODO: on NIL selection, txtCq and txtBq should populate 0.
 		con = DBConnection.doConnect();
 		listCust.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); // this is purely from the pov of deleting customers which don't have a variation in milk delivered on a particular day.
 		reset();

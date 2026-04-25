@@ -90,13 +90,11 @@ public class BillingHistoryController {
 
 	@FXML
 	void doPaid(ActionEvent event) {
-
 		try {
 			// selecting all customers with paid bills
 			PreparedStatement pst = con.prepareStatement("select * from billpanel where status=?");
 			pst.setBoolean(1, true);
 			getRecordsFromDatabase(pst);
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -105,23 +103,19 @@ public class BillingHistoryController {
 
 	@FXML
 	void doUnpaid(ActionEvent event) {
-
 		try {
 			// selecting all customers with paid bills
 			PreparedStatement pst = con.prepareStatement("select * from billpanel where status=?");
 			pst.setBoolean(1, false);
 			getRecordsFromDatabase(pst);
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		tbl.setItems(list);
-
 	}
 
 	@FXML
 	void doShow(ActionEvent event) {
-
 		String name = comboName.getSelectionModel().getSelectedItem();
 		try {
 			// fetching bills for respective name

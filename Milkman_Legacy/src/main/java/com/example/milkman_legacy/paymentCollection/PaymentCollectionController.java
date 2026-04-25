@@ -99,7 +99,6 @@ public class PaymentCollectionController {
 				lblAmt.setText(String.valueOf(table.getFloat("amount")));
 				lblDtF.setText(table.getString("dos"));
 				lblDtT.setText(table.getString("doe"));
-
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
