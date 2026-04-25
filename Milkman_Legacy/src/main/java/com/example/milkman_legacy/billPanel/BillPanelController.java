@@ -85,8 +85,8 @@ public class BillPanelController {
 	private boolean isNameSelected() {
 		String selectedName = listCust.getSelectionModel().getSelectedItem();
 		if(selectedName == null || selectedName.isBlank()) {
-			System.out.println("ERROR: Name not selected: " + selectedName);
-			showAlert("Select Name", "Select customer from list to proceed further", Alert.AlertType.ERROR);
+			System.out.println("ERROR: Customer not selected from list: " + selectedName);
+			showAlert("Select Customer", "Select customer from list to proceed further", Alert.AlertType.ERROR);
 			return false;
 		}
 		return true;

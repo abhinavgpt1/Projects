@@ -50,8 +50,8 @@ public class VariationDisplayController {
 	private boolean isNameSelected() {
 		String selectedName = comboName.getSelectionModel().getSelectedItem();
 		if(selectedName == null || selectedName.isBlank()) {
-			System.out.println("ERROR: Name not selected: " + selectedName);
-			showAlert("Select Name", "Select a customer from list to see variation logs", Alert.AlertType.ERROR);
+			System.out.println("ERROR: Customer not selected from list: " + selectedName);
+			showAlert("Select Customer", "Select a customer from list to see variation logs", Alert.AlertType.ERROR);
 			return false;
 		}
 		return true;

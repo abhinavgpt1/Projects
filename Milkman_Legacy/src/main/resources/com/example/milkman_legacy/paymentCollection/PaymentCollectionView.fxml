@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Font?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <AnchorPane prefHeight="550.0" prefWidth="550.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.milkman_legacy.paymentCollection.PaymentCollectionController">
    <children>
@@ -17,7 +13,7 @@
             <Image url="@../assets/images/app-background-overlay-img.jpg" />
          </image>
       </ImageView>
-      <Label alignment="CENTER" layoutX="47.0" layoutY="31.0" prefHeight="17.0" prefWidth="452.0" text="PayMenT COLLECTION" AnchorPane.bottomAnchor="482.0" AnchorPane.leftAnchor="47.0" AnchorPane.rightAnchor="47.0">
+      <Label alignment="CENTER" layoutX="47.0" layoutY="31.0" prefHeight="17.0" prefWidth="452.0" text="Record Payment" AnchorPane.bottomAnchor="482.0" AnchorPane.leftAnchor="47.0" AnchorPane.rightAnchor="47.0">
          <font>
             <Font name="Berlin Sans FB" size="33.0" />
          </font>
@@ -36,66 +32,66 @@
          </image>
       </ImageView>
       <Separator layoutX="115.0" layoutY="75.0" prefHeight="0.0" prefWidth="335.0" />
-      <Button layoutX="172.0" layoutY="320.0" mnemonicParsing="false" onAction="#doReceive" prefHeight="38.0" prefWidth="221.0" text="Received Payment">
+      <Button layoutX="171.0" layoutY="334.0" mnemonicParsing="false" onAction="#doReceive" prefHeight="38.0" prefWidth="221.0" text="Received Payment">
          <font>
             <Font name="Georgia Bold" size="18.0" />
          </font></Button>
-      <ComboBox fx:id="comboName" layoutX="207.0" layoutY="112.0" prefWidth="150.0" />
-      <Label alignment="CENTER_RIGHT" layoutX="130.0" layoutY="117.0" prefHeight="16.0" prefWidth="56.0" text="Name">
+      <ComboBox fx:id="comboName" layoutX="207.0" layoutY="108.0" prefWidth="150.0" />
+      <Label alignment="CENTER_RIGHT" layoutX="130.0" layoutY="113.0" prefHeight="16.0" prefWidth="56.0" text="Name">
          <font>
             <Font name="Georgia" size="14.0" />
          </font>
       </Label>
-      <Label alignment="CENTER_RIGHT" layoutX="102.0" layoutY="212.0" prefHeight="24.0" prefWidth="84.0" text="Amount">
+      <Label alignment="CENTER" layoutX="171.0" layoutY="249.0" prefHeight="24.0" prefWidth="84.0" text="Amount">
          <font>
             <Font name="Georgia Bold" size="20.0" />
          </font>
       </Label>
-      <Label alignment="CENTER_RIGHT" layoutX="119.0" layoutY="166.0" prefHeight="16.0" prefWidth="69.0" text="Total CQty">
+      <Label layoutX="48.0" layoutY="162.0" prefHeight="16.0" prefWidth="127.0" text="Total Cow Milk Qty" textAlignment="CENTER">
          <font>
             <Font name="Georgia" size="14.0" />
          </font>
       </Label>
-      <Label alignment="CENTER_RIGHT" layoutX="316.0" layoutY="167.0" prefHeight="16.0" prefWidth="69.0" text="Total BQty">
+      <Label alignment="CENTER_RIGHT" layoutX="43.0" layoutY="194.0" prefHeight="16.0" prefWidth="143.0" text="Total Buffalo Milk Qty">
          <font>
             <Font name="Georgia" size="14.0" />
          </font>
       </Label>
-      <Label fx:id="lblCq" layoutX="207.0" layoutY="164.0" prefHeight="17.0" prefWidth="69.0">
+      <Label fx:id="lblCq" layoutX="204.0" layoutY="160.0" prefHeight="17.0" prefWidth="69.0">
          <font>
             <Font size="14.0" />
          </font>
       </Label>
-      <Label fx:id="lblBq" layoutX="401.0" layoutY="164.0" prefHeight="17.0" prefWidth="69.0" text=" ">
+      <Label fx:id="lblBq" layoutX="202.0" layoutY="191.0" prefHeight="17.0" prefWidth="69.0" text=" ">
          <font>
             <Font size="14.0" />
          </font>
       </Label>
-      <Label fx:id="lblAmt" alignment="CENTER" layoutX="207.0" layoutY="208.0" prefHeight="26.0" prefWidth="117.0">
+      <Label fx:id="lblAmt" alignment="CENTER" layoutX="276.0" layoutY="247.0" prefHeight="26.0" prefWidth="117.0">
          <font>
             <Font size="17.0" />
          </font>
       </Label>
-      <Label alignment="CENTER_RIGHT" layoutX="329.0" layoutY="265.0" prefHeight="16.0" prefWidth="56.0" text="Date to">
+      <Label layoutX="323.0" layoutY="193.0" prefHeight="16.0" prefWidth="69.0" text="Date to">
          <font>
             <Font name="Georgia" size="14.0" />
          </font>
       </Label>
-      <Label alignment="CENTER_RIGHT" layoutX="117.0" layoutY="265.0" prefHeight="16.0" prefWidth="69.0" text="Date from">
+      <Label layoutX="323.0" layoutY="162.0" prefHeight="16.0" prefWidth="69.0" text="Date from">
          <font>
             <Font name="Georgia" size="14.0" />
          </font>
       </Label>
-      <Label fx:id="lblDtF" layoutX="207.0" layoutY="263.0" prefHeight="20.0" prefWidth="108.0">
+      <Label fx:id="lblDtF" layoutX="399.0" layoutY="160.0" prefHeight="20.0" prefWidth="108.0">
          <font>
             <Font size="14.0" />
          </font>
       </Label>
-      <Label fx:id="lblDtT" layoutX="403.0" layoutY="263.0" prefHeight="20.0" prefWidth="108.0">
+      <Label fx:id="lblDtT" layoutX="399.0" layoutY="192.0" prefHeight="20.0" prefWidth="108.0">
          <font>
             <Font size="14.0" />
          </font>
       </Label>
-      <Button layoutX="359.0" layoutY="112.0" mnemonicParsing="false" onAction="#doFetch" text="fetch" />
+      <Button layoutX="359.0" layoutY="108.0" mnemonicParsing="false" onAction="#doFetch" text="Fetch" />
    </children>
 </AnchorPane>
