@@ -123,8 +123,8 @@ public class BillingHistoryController {
 	void doUnpaid(ActionEvent event) {
 		if (billPanelBeanTableList == null)
 			return;
-		// Paid/Unpaid radio buttons should act as a filter on the data already fetched
-		// rather than fetching all records from database which are paid/unpaid (irrespective of name selected)
+		// Paid/Unpaid radio buttons should ideally act as a filter on the data already fetched
+		// instead of fetching all paid/unpaid records from database irrespective of name selected
 		// => [Logically Incorrect] String queryForPst = "select * from billpanel where status=?"; // status = false,true
 		billPanelBeanTableList.setPredicate(billPanelBean -> "unpaid".equals(billPanelBean.getBstatus()));
 	}
@@ -180,9 +180,8 @@ public class BillingHistoryController {
 	}
 
 	private void fillOnboardedCustomers() {
-		try {
-			PreparedStatement pst = con.prepareStatement("select distinct sname from billpanel");
-			ResultSet table = pst.executeQuery();
+		try (PreparedStatement pst = con.prepareStatement("select distinct sname from billpanel");
+			 ResultSet table = pst.executeQuery()) {
 			while (table.next()) {
 				comboName.getItems().add(table.getString("sname"));
 			}

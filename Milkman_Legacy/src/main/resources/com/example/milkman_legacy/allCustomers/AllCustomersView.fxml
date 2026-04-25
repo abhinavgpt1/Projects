@@ -11,16 +11,17 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="550.0" prefWidth="550.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.milkman_legacy.allCustomers.AllCustomersController">
+<AnchorPane prefHeight="550.0" prefWidth="550.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.milkman_legacy.allCustomers.AllCustomersController">
    <children>
       <ImageView fitHeight="486.0" fitWidth="558.0" layoutX="-1.0" layoutY="30.0" opacity="0.81" pickOnBounds="true">
          <image>
             <Image url="@../assets/images/app-background-overlay-img.jpg" />
          </image>
       </ImageView>
-      <Label alignment="CENTER" layoutX="47.0" layoutY="31.0" prefHeight="17.0" prefWidth="452.0" text="ALL CUSTOMERS" AnchorPane.bottomAnchor="482.0" AnchorPane.leftAnchor="47.0" AnchorPane.rightAnchor="47.0">
+      <Label alignment="CENTER" layoutX="47.333333333333336" layoutY="34.000000000000036" prefHeight="17.0" prefWidth="452.0" text="ALL CUSTOMERS" AnchorPane.bottomAnchor="479.0" AnchorPane.leftAnchor="47.333333333333336" AnchorPane.rightAnchor="47.333333333333314">
          <font>
             <Font name="Berlin Sans FB" size="33.0" />
          </font>
@@ -38,11 +39,12 @@
             <Image url="@../assets/images/app-background-img.jpg" />
          </image>
       </ImageView>
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#eceeef" height="72.0" layoutX="69.0" layoutY="175.0" stroke="#f2eded" strokeType="INSIDE" width="427.0" />
       <Separator layoutX="115.0" layoutY="75.0" prefHeight="0.0" prefWidth="335.0" />
-      <ComboBox fx:id="comboDate" editable="true" layoutX="233.0" layoutY="97.0" prefWidth="150.0" />
-      <Button layoutX="383.0" layoutY="96.0" mnemonicParsing="false" onAction="#doFetchByDate" prefHeight="27.0" prefWidth="45.0" text="Fetch" />
-      <Separator layoutX="158.0" layoutY="152.0" prefWidth="285.0" AnchorPane.leftAnchor="130.0" AnchorPane.rightAnchor="115.0" />
-      <Label alignment="CENTER" layoutX="354.0" layoutY="170.0" prefHeight="27.0" prefWidth="89.0" text="Milk Buyers">
+      <ComboBox fx:id="comboDate" editable="true" layoutX="153.0" layoutY="97.0" prefWidth="150.0" />
+      <Button layoutX="303.0" layoutY="96.0" mnemonicParsing="false" onAction="#doFetchByDate" prefHeight="27.0" prefWidth="45.0" text="Fetch" />
+      <Separator layoutX="74.0" layoutY="155.0" prefHeight="3.0" prefWidth="417.0" AnchorPane.leftAnchor="74.0" AnchorPane.rightAnchor="67.33333333333331" />
+      <Label alignment="CENTER" layoutX="86.0" layoutY="197.0" prefHeight="27.0" prefWidth="89.0" text="Milk Type">
          <font>
             <Font name="Georgia" size="16.0" />
          </font>
@@ -50,26 +52,27 @@
             <Insets />
          </opaqueInsets>
       </Label>
-      <Label alignment="CENTER_RIGHT" layoutX="125.0" layoutY="100.0" prefHeight="19.0" prefWidth="108.0" text="Date of Start   ">
+      <Label alignment="CENTER_RIGHT" layoutX="45.0" layoutY="100.0" prefHeight="19.0" prefWidth="108.0" text="Date of Start   ">
          <font>
             <Font name="Georgia" size="16.0" />
          </font>
       </Label>
-      <Button layoutX="447.0" layoutY="170.0" mnemonicParsing="false" onAction="#doFetchBuyers" prefHeight="27.0" prefWidth="45.0" text="Fetch" />
-      <Button layoutX="233.0" layoutY="221.0" mnemonicParsing="false" onAction="#doShow" prefHeight="27.0" prefWidth="108.0" text="Show All" />
-      <RadioButton fx:id="radCow" layoutX="84.0" layoutY="172.0" mnemonicParsing="false" prefHeight="23.0" prefWidth="64.0" text="Cow">
+      <Button layoutX="401.0" layoutY="197.0" mnemonicParsing="false" onAction="#doFilterByMilkType" prefHeight="27.0" prefWidth="75.0" text="Filter" />
+      <Button layoutX="407.0" layoutY="96.0" mnemonicParsing="false" onAction="#doShowAllCustomers" prefHeight="27.0" prefWidth="108.0" text="All Customers" />
+      <RadioButton fx:id="radCow" layoutX="202.0" layoutY="199.0" mnemonicParsing="false" prefHeight="23.0" prefWidth="64.0" text="Cow">
          <font>
             <Font name="Georgia" size="15.0" />
          </font>
          <toggleGroup>
-            <ToggleGroup fx:id="select" />
+            <ToggleGroup fx:id="milkTypeToggleGroup" />
          </toggleGroup>
       </RadioButton>
-      <RadioButton fx:id="radBuff" layoutX="202.0" layoutY="174.0" mnemonicParsing="false" text="Buffalo" toggleGroup="$select">
+      <RadioButton fx:id="radBuff" layoutX="294.0" layoutY="201.0" mnemonicParsing="false" text="Buffalo" toggleGroup="$milkTypeToggleGroup">
          <font>
             <Font name="Georgia" size="15.0" />
          </font>
       </RadioButton>
-      <TableView fx:id="tbl" layoutX="32.0" layoutY="275.0" prefHeight="229.0" prefWidth="490.0" />
+      <TableView fx:id="tbl" layoutX="37.0" layoutY="275.0" prefHeight="229.0" prefWidth="490.0" />
+      <Separator layoutX="375.0" layoutY="83.0" orientation="VERTICAL" prefHeight="60.0" prefWidth="0.0" />
    </children>
 </AnchorPane>

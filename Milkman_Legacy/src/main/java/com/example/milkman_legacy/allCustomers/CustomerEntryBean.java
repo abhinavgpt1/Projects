@@ -1,6 +1,6 @@
 package com.example.milkman_legacy.allCustomers;
 
-public class CustomerBean {
+public class CustomerEntryBean {
 	private String name;
 	private float cprice;
 	private float cqty;
@@ -8,8 +8,7 @@ public class CustomerBean {
 	private float bqty;
 	private String dos;
 
-	public CustomerBean(String name, float cprice, float cqty, float bprice, float bqty, String dos) {
-		super();
+	public CustomerEntryBean(String name, float cprice, float cqty, float bprice, float bqty, String dos) {
 		this.name = name;
 		this.cprice = cprice;
 		this.cqty = cqty;

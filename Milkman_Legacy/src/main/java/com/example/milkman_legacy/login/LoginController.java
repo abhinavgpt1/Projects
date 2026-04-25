@@ -73,6 +73,7 @@ public class LoginController {
 			return;
 		// If the admin / milkman forgets the password, then there's DB access
 		// TODO: add a signup and forgot password page
+		// TODO: add different ways to login
 		String query = "select * from idpwd where id = ?";
 		try (PreparedStatement pst = con.prepareStatement(query)) {
 			String loginIdInput = txtId.getText();

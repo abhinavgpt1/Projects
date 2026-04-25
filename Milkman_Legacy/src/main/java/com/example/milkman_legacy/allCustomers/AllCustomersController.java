@@ -6,22 +6,29 @@ package com.example.milkman_legacy.allCustomers;
 
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ResourceBundle;
 
 import com.example.milkman_legacy.util.DBConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
+
+import static com.example.milkman_legacy.util.UIHelper.showAlert;
 
 public class AllCustomersController {
 
@@ -37,78 +44,72 @@ public class AllCustomersController {
 	@FXML // fx:id="radCow"
 	private RadioButton radCow; // Value injected by FXMLLoader
 
-	@FXML // fx:id="select"
-	private ToggleGroup select; // Value injected by FXMLLoader
+	@FXML // fx:id="milkTypeToggleGroup"
+	private ToggleGroup milkTypeToggleGroup; // Value injected by FXMLLoader
 
 	@FXML // fx:id="radBuff"
 	private RadioButton radBuff; // Value injected by FXMLLoader
 
 	@FXML // fx:id="tbl"
-	private TableView<CustomerBean> tbl; // Value injected by FXMLLoader
+	private TableView<CustomerEntryBean> tbl; // Value injected by FXMLLoader
 
 	Connection con;
-	ResultSet table;
+	private FilteredList<CustomerEntryBean> customerEntryBeanTableList = null;
+
+	private boolean isDateOfSubscriptionStartValid() {
+		String selectedDate = comboDate.getSelectionModel().getSelectedItem();
+		try {
+			LocalDate.parse(selectedDate); // by default DateFormatter is ISO_LOCAL_DATE
+			return true;
+		} catch (DateTimeParseException | NullPointerException e) {
+			System.out.println("ERROR: Date not selected: " + selectedDate);
+			showAlert("Invalid Date", "Select a date from list or enter a valid one in format YYYY-MM-DD", Alert.AlertType.ERROR);
+			return false;
+		}
+	}
 
 	@FXML
-	void doFetchBuyers(ActionEvent event) {
-
+	void doFilterByMilkType(ActionEvent event) {
+		if (customerEntryBeanTableList == null || milkTypeToggleGroup.getSelectedToggle() == null)
+			return;
+		// Cow/Buffalo radio buttons should ideally act as a filter on the data already fetched
+		// instead of fetching all cow/buffalo milk consuming customers from database irrespective of date selected.
+		// => [Logically Incorrect] String queryForPst = "select * from customerentry where cq <> 0"; // for cow milk consuming customers
 		if (radCow.isSelected()) {
-			try {
-				// fetching records where cow qty !=0
-				PreparedStatement pst = con.prepareStatement("select * from customerentry where cq<> ?");
-				pst.setFloat(1, 0);
-				getRecordFromDatabase(pst);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			customerEntryBeanTableList.setPredicate(customerEntry -> customerEntry.getCqty() != 0);
+		} else {
+			customerEntryBeanTableList.setPredicate(customerEntry -> customerEntry.getBqty() != 0);
 		}
-		if (radBuff.isSelected()) {
-			try {
-				// fetching records where buff. qty !=0
-				PreparedStatement pst = con.prepareStatement("select * from customerentry where bq<> ?");
-				pst.setFloat(1, 0);
-				getRecordFromDatabase(pst);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		tbl.setItems(list);
 	}
 
 	@FXML
 	void doFetchByDate(ActionEvent event) {
-		String dos = comboDate.getSelectionModel().getSelectedItem();
-		try {
-			PreparedStatement pst = con.prepareStatement("select * from customerentry where dos=?");
-			pst.setString(1, dos);
-
-			getRecordFromDatabase(pst);
+		if (!isDateOfSubscriptionStartValid()) {
+			return;
+		}
+		String dateOfSubscriptionStart = comboDate.getSelectionModel().getSelectedItem();
+		String query = "select * from customerentry where dos=?";
+		try (PreparedStatement pst = con.prepareStatement(query)) {
+			pst.setDate(1, Date.valueOf(dateOfSubscriptionStart));
+			setTableItemsFromPreparedStatement(pst);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		tbl.setItems(list);
 	}
 
 	@FXML
-	void doShow(ActionEvent event) {
-		try {
-			// by specifying column names a fixed data is fetched(which is usable)[we've
-			// avoided fetching the whole record]
-			PreparedStatement pst = con.prepareStatement("select sname,cq,cprice,bq,bprice,dos from customerentry");
-			getRecordFromDatabase(pst);
+	void doShowAllCustomers(ActionEvent event) {
+		String query = "select sname, cq, cprice, bq, bprice, dos from customerentry";
+		try (PreparedStatement pst = con.prepareStatement(query)) {
+			setTableItemsFromPreparedStatement(pst);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		tbl.setItems(list);
 	}
 
-	ObservableList<CustomerBean> list;
-
-	void getRecordFromDatabase(PreparedStatement pst) {
-		// creating observable list
-		list = FXCollections.observableArrayList();
-		try {
-			table = pst.executeQuery();
+	private void setTableItemsFromPreparedStatement(PreparedStatement pst) {
+		ObservableList<CustomerEntryBean> list = FXCollections.observableArrayList();
+		try (ResultSet table = pst.executeQuery()) {
 			while (table.next()) {
 				String name = table.getString("sname");
 				float cq = table.getFloat("cq");
@@ -116,21 +117,25 @@ public class AllCustomersController {
 				float bq = table.getFloat("bq");
 				float bp = table.getFloat("bprice");
 				String dos = table.getString("dos");
-				CustomerBean obj = new CustomerBean(name, cp, cq, bp, bq, dos);
+				CustomerEntryBean obj = new CustomerEntryBean(name, cp, cq, bp, bq, dos);
 				list.add(obj);
-
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		customerEntryBeanTableList = new FilteredList<>(list); // saved for reference for performing paid/unpaid radio operations.
+		tbl.setItems(customerEntryBeanTableList);
+		if (list.isEmpty()) {
+			System.out.println("INFO: No customer records found");
+			showAlert("No Records Found", "No customer records found in database", Alert.AlertType.INFORMATION);
+		}
 	}
 
-	void fillCombo() {
-		try {
-			PreparedStatement pst = con.prepareStatement("select distinct dos from customerentry");
-			table = pst.executeQuery();
+	private void fillDistinctSubscriptionStartDates() {
+		try (PreparedStatement pst = con.prepareStatement("select distinct dos from customerentry");
+			 ResultSet table = pst.executeQuery()) {
 			while (table.next()) {
-				comboDate.getItems().add(table.getString("dos"));// table.getDate("dos").toString() is also fine
+				comboDate.getItems().add(table.getDate("dos").toString());
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -140,29 +145,22 @@ public class AllCustomersController {
 	@FXML
 	void initialize() {
 		con = DBConnection.doConnect();
-		fillCombo();
-		// creating our own columns
-		TableColumn<CustomerBean, String> name = new TableColumn<>("Name");
+		fillDistinctSubscriptionStartDates();
+
+		// Setup TableView
+		TableColumn<CustomerEntryBean, String> name = new TableColumn<>("Name");
 		name.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-		TableColumn<CustomerBean, Float> cq = new TableColumn<>("Cow qty");
+		TableColumn<CustomerEntryBean, Float> cq = new TableColumn<>("Cow Milk (/day)");
 		cq.setCellValueFactory(new PropertyValueFactory<>("cqty"));
-
-		TableColumn<CustomerBean, Float> cp = new TableColumn<>("Cow price");
+		TableColumn<CustomerEntryBean, Float> cp = new TableColumn<>("Cow Milk Price");
 		cp.setCellValueFactory(new PropertyValueFactory<>("cprice"));
-
-		TableColumn<CustomerBean, Float> bq = new TableColumn<>("Buff qty");
+		TableColumn<CustomerEntryBean, Float> bq = new TableColumn<>("Buffalo Milk (/day)");
 		bq.setCellValueFactory(new PropertyValueFactory<>("bqty"));
-
-		TableColumn<CustomerBean, Float> bp = new TableColumn<>("Buff price");
+		TableColumn<CustomerEntryBean, Float> bp = new TableColumn<>("Buffalo Milk Price");
 		bp.setCellValueFactory(new PropertyValueFactory<>("bprice"));
-
-		TableColumn<CustomerBean, String> dos = new TableColumn<>("D.O.S");
+		TableColumn<CustomerEntryBean, String> dos = new TableColumn<>("DOS");
 		dos.setCellValueFactory(new PropertyValueFactory<>("dos"));
 
-		// clearing existing columns(if any)
-		tbl.getColumns().clear();
-		// adding our own columns
 		tbl.getColumns().addAll(name, cq, cp, bq, bp, dos);
 
 	}
