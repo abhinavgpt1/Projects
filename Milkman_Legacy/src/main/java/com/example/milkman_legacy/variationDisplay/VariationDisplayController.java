@@ -21,8 +21,9 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
+
+import static com.example.milkman_legacy.util.UIHelper.showAlert;
 
 public class VariationDisplayController {
 
@@ -45,92 +46,117 @@ public class VariationDisplayController {
 	private TableView<CustomerBean> tbl; // Value injected by FXMLLoader
 
 	Connection con;
-	ResultSet table;
+
+	private boolean isNameSelected() {
+		String selectedName = comboName.getSelectionModel().getSelectedItem();
+		if(selectedName == null || selectedName.isBlank()) {
+			System.out.println("ERROR: Name not selected: " + selectedName);
+			showAlert("Select Name", "Select a customer from list to proceed further", Alert.AlertType.ERROR);
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isFromDateValid() {
+		if (dtpDateFrom.getValue() == null) {
+			System.out.println("ERROR: Invalid From Date: " + dtpDateFrom.getEditor().getText());
+			showAlert("Invalid From Date", "Enter a valid date in dd/mm/yyyy format", Alert.AlertType.ERROR);
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isToDateValid() {
+		if (dtpDateTo.getValue() == null) {
+			System.out.println("ERROR: Invalid To Date: " + dtpDateTo.getEditor().getText());
+			showAlert("Invalid To Date", "Enter a valid date in dd/mm/yyyy format", Alert.AlertType.ERROR);
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isFromDateBeforeOrEqualsToDate() {
+		if (dtpDateFrom.getValue().isAfter(dtpDateTo.getValue())) {
+			String errorMsg = String.format("From Date (%s) is greater than To Date (%s)", dtpDateFrom.getValue(), dtpDateTo.getValue());
+			System.out.println("ERROR: " + errorMsg);
+			showAlert("Invalid Date Range", errorMsg, Alert.AlertType.ERROR);
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isValidDateRange() {
+		return isFromDateValid() && isToDateValid() && isFromDateBeforeOrEqualsToDate();
+	}
 
 	@FXML
 	void doFind(ActionEvent event) {
+		if(!isNameSelected()) {
+			return;
+		}
 		String name = comboName.getSelectionModel().getSelectedItem();
-
-		try {
-			PreparedStatement pst = con.prepareStatement("select * from variationconsole where sname=?");
+		String query = "select * from variationconsole where sname=?";
+		try (PreparedStatement pst = con.prepareStatement(query)) {
 			pst.setString(1, name);
-
-			getRecordsFromDatabase(pst);
+			setTableItemsFromPreparedStatement(pst);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		tbl.setItems(list);
 	}
 
 	@FXML
 	void doShow(ActionEvent event) {
-		// this function works for the name selected
-		String name = comboName.getSelectionModel().getSelectedItem();
-		try {
-			// check if dtpdateFrom > dtpdateTo
-			if (dtpDateTo.getValue().isBefore(dtpDateFrom.getValue()))
-				showMsg("'Date To' cannot be before 'Date From'");
+		// This function works over date range for the name selected
+		if(!isNameSelected() || !isValidDateRange()) {
+			return;
+		}
 
-			else {
-				PreparedStatement pst = con
-						.prepareStatement("select * from variationconsole where sname=? and cdate>=? and cdate<=?");
-				pst.setString(1, name);
-				pst.setDate(2, java.sql.Date.valueOf(dtpDateFrom.getValue()));
-				pst.setDate(3, java.sql.Date.valueOf(dtpDateTo.getValue()));
-				getRecordsFromDatabase(pst);
-			}
+		String name = comboName.getSelectionModel().getSelectedItem();
+		String query = "select * from variationconsole where sname=? and cdate>=? and cdate<=?";
+		try (PreparedStatement pst = con.prepareStatement(query)) {
+			pst.setString(1, name);
+			pst.setDate(2, java.sql.Date.valueOf(dtpDateFrom.getValue()));
+			pst.setDate(3, java.sql.Date.valueOf(dtpDateTo.getValue()));
+			setTableItemsFromPreparedStatement(pst);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		tbl.setItems(list);
-	}
-
-	void showMsg(String msg) {
-		Alert al = new Alert(AlertType.ERROR);
-		al.setTitle("Errrrror");
-		al.setContentText(msg);
-		al.show();
 	}
 
 	@FXML
 	void doShowAll(ActionEvent event) {
-		try {
-			PreparedStatement pst = con.prepareStatement("select * from variationconsole");
-			getRecordsFromDatabase(pst);
+		String query = "select * from variationconsole";
+		try (PreparedStatement pst = con.prepareStatement(query)) {
+			setTableItemsFromPreparedStatement(pst);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		tbl.setItems(list);
-
 	}
 
-	ObservableList<CustomerBean> list;
-
-	void getRecordsFromDatabase(PreparedStatement pst) {
-		// creating list of CustomerBean
-		list = FXCollections.observableArrayList();
-		try {
-			table = pst.executeQuery();
-
+	private void setTableItemsFromPreparedStatement(PreparedStatement pst) {
+		ObservableList<CustomerBean> list = FXCollections.observableArrayList();
+		try (ResultSet table = pst.executeQuery()) {
 			while (table.next()) {
 				String name = table.getString("sname");
 				String date = table.getString("cdate");
 				float cq = table.getFloat("cq");
 				float bq = table.getFloat("bq");
-				CustomerBean obj = new CustomerBean(name, date, cq, bq);
-				list.add(obj);
-
+				list.add(new CustomerBean(name, date, cq, bq));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
+		tbl.setItems(list);
+		if (list.isEmpty()) {
+			System.out.println("INFO: No records found for variations");
+			showAlert("No Records Found", "No variation records found in database", Alert.AlertType.INFORMATION);
+		}
 	}
 
-	void fillCombo() {
+	private void fillOnboardedCustomers() {
 		try {
 			PreparedStatement pst = con.prepareStatement("select distinct sname from variationconsole");
-			table = pst.executeQuery();
+			ResultSet table = pst.executeQuery();
 			while (table.next()) {
 				comboName.getItems().add(table.getString("sname"));
 			}
@@ -142,8 +168,10 @@ public class VariationDisplayController {
 	@FXML
 	void initialize() {
 		con = DBConnection.doConnect();
-		fillCombo();
-		// setting up columns of TableView
+		fillOnboardedCustomers();
+
+		// TableView setup
+		// TODO: can make this table editable with update button for every row
 		TableColumn<CustomerBean, String> name = new TableColumn<>("Name");
 		name.setCellValueFactory(new PropertyValueFactory<>("name"));
 
