@@ -43,7 +43,7 @@ public class VariationDisplayController {
 	private DatePicker dtpDateTo; // Value injected by FXMLLoader
 
 	@FXML // fx:id="tbl"
-	private TableView<CustomerBean> tbl; // Value injected by FXMLLoader
+	private TableView<VariationConsoleBean> tbl; // Value injected by FXMLLoader
 
 	Connection con;
 
@@ -51,7 +51,7 @@ public class VariationDisplayController {
 		String selectedName = comboName.getSelectionModel().getSelectedItem();
 		if(selectedName == null || selectedName.isBlank()) {
 			System.out.println("ERROR: Name not selected: " + selectedName);
-			showAlert("Select Name", "Select a customer from list to proceed further", Alert.AlertType.ERROR);
+			showAlert("Select Name", "Select a customer from list to see variation logs", Alert.AlertType.ERROR);
 			return false;
 		}
 		return true;
@@ -134,14 +134,14 @@ public class VariationDisplayController {
 	}
 
 	private void setTableItemsFromPreparedStatement(PreparedStatement pst) {
-		ObservableList<CustomerBean> list = FXCollections.observableArrayList();
+		ObservableList<VariationConsoleBean> list = FXCollections.observableArrayList();
 		try (ResultSet table = pst.executeQuery()) {
 			while (table.next()) {
 				String name = table.getString("sname");
 				String date = table.getString("cdate");
 				float cq = table.getFloat("cq");
 				float bq = table.getFloat("bq");
-				list.add(new CustomerBean(name, date, cq, bq));
+				list.add(new VariationConsoleBean(name, date, cq, bq));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -172,21 +172,18 @@ public class VariationDisplayController {
 
 		// TableView setup
 		// TODO: can make this table editable with update button for every row
-		TableColumn<CustomerBean, String> name = new TableColumn<>("Name");
+		TableColumn<VariationConsoleBean, String> name = new TableColumn<>("Name");
 		name.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-		TableColumn<CustomerBean, String> date = new TableColumn<>("Date");
+		TableColumn<VariationConsoleBean, String> date = new TableColumn<>("Date");
 		date.setCellValueFactory(new PropertyValueFactory<>("date"));
 
-		TableColumn<CustomerBean, Float> cq = new TableColumn<>("Cow qty");
+		TableColumn<VariationConsoleBean, Float> cq = new TableColumn<>("Cow qty");
 		cq.setCellValueFactory(new PropertyValueFactory<>("cqty"));
 
-		TableColumn<CustomerBean, Float> bq = new TableColumn<>("Buffalo qty");
+		TableColumn<VariationConsoleBean, Float> bq = new TableColumn<>("Buffalo qty");
 		bq.setCellValueFactory(new PropertyValueFactory<>("bqty"));
 
-		// clearing existing columns(if any)[the ones in scene builder(c1,c2)]
-		tbl.getColumns().clear();
-		// adding own columns in the table
 		tbl.getColumns().addAll(name, date, cq, bq);
 	}
 }

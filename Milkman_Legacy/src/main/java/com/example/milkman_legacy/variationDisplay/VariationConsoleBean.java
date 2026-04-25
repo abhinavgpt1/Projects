@@ -1,15 +1,12 @@
 package com.example.milkman_legacy.variationDisplay;
 
-public class CustomerBean {
-	String name;
-	String date;
-	float cqty;
-	float bqty;
+public class VariationConsoleBean {
+	private String name;
+	private String date;
+	private float cqty;
+	private float bqty;
 
-	public CustomerBean() {
-	}
-
-	public CustomerBean(String name, String date, float cqty, float bqty) {
+	public VariationConsoleBean(String name, String date, float cqty, float bqty) {
 		super();
 		this.name = name;
 		this.date = date;
